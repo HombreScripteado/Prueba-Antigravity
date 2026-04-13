@@ -1,0 +1,312 @@
+{
+  "restaurantName": "Restaurante Gourmet",
+  "categories": [
+    {
+      "id": "comidas",
+      "name": "Comidas",
+      "subtitle": "Platos principales y entrantes",
+      "sections": [
+        {
+          "title": "Entrantes",
+          "items": [
+            {
+              "id": "carpaccio",
+              "name": "Carpaccio de Res",
+              "description": "Finas láminas de res con rúcula, parmesano y vinagreta de trufa",
+              "price": 18.00,
+              "arModel": "carpaccio",
+              "chefRecommendation": false,
+              "isGlutenFree": true
+            },
+            {
+              "id": "ceviche",
+              "name": "Ceviche de Lubina",
+              "description": "Lubina fresca marinada en cítricos con leche de tigre y camote",
+              "price": 22.00,
+              "arModel": "ceviche",
+              "chefRecommendation": false,
+              "isGlutenFree": true
+            },
+            {
+              "id": "burrata",
+              "name": "Burrata Caprese",
+              "description": "Burrata cremosa con tomates heirloom, albahaca y reducción de balsámico",
+              "price": 16.00,
+              "arModel": "burrata",
+              "chefRecommendation": false,
+              "isVegetarian": true,
+              "isGlutenFree": true
+            }
+          ]
+        },
+        {
+          "title": "Platos Principales",
+          "items": [
+            {
+              "id": "ribeye",
+              "name": "Ribeye Premium",
+              "description": "Corte de 400g madurado 28 días, con mantequilla de hierbas y papas trufadas",
+              "price": 58.00,
+              "arModel": "ribeye",
+              "chefRecommendation": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "salmon",
+              "name": "Salmón Noruego",
+              "description": "Filete de salmón glaseado con miso, bok choy y arroz jazmín",
+              "price": 42.00,
+              "arModel": "salmon",
+              "chefRecommendation": false,
+              "isGlutenFree": true
+            },
+            {
+              "id": "risotto",
+              "name": "Risotto de Hongos",
+              "description": "Arborio cremoso con porcini, champiñones silvestres y aceite de trufa",
+              "price": 34.00,
+              "arModel": "risotto",
+              "chefRecommendation": false,
+              "isVegetarian": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "pato",
+              "name": "Magret de Pato",
+              "description": "Pechuga de pato con salsa de frutos rojos, puré de castañas y vegetales glaseados",
+              "price": 46.00,
+              "arModel": "pato",
+              "chefRecommendation": false,
+              "isGlutenFree": true
+            },
+            {
+              "id": "cordero",
+              "name": "Carré de Cordero",
+              "description": "Costillas de cordero con costra de hierbas, ratatouille y jus de romero",
+              "price": 52.00,
+              "arModel": "cordero",
+              "chefRecommendation": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bebidas",
+      "name": "Bebidas",
+      "subtitle": "Vinos, cócteles y más",
+      "sections": [
+        {
+          "title": "Cócteles de la Casa",
+          "items": [
+            {
+              "id": "old-fashioned",
+              "name": "Old Fashioned Premium",
+              "description": "Bourbon añejo, bitter aromático, azúcar moreno y twist de naranja",
+              "price": 16.00,
+              "arModel": "old-fashioned",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "negroni",
+              "name": "Negroni Reserva",
+              "description": "Gin premium, Campari, vermut rojo y naranja deshidratada",
+              "price": 15.00,
+              "arModel": "negroni",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "espresso-martini",
+              "name": "Espresso Martini",
+              "description": "Vodka, licor de café, espresso fresco y granos de café",
+              "price": 14.00,
+              "arModel": "espresso-martini",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "mojito",
+              "name": "Mojito de la Casa",
+              "description": "Ron blanco premium, hierbabuena fresca, lima y soda artesanal",
+              "price": 13.00,
+              "arModel": "mojito",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            }
+          ]
+        },
+        {
+          "title": "Vinos Tintos",
+          "items": [
+            {
+              "id": "malbec",
+              "name": "Malbec Reserva",
+              "description": "Mendoza, Argentina · Notas de ciruela, mora y especias · 2019",
+              "price": 65.00,
+              "arModel": "malbec",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "cabernet",
+              "name": "Cabernet Sauvignon Gran Reserva",
+              "description": "Napa Valley, USA · Elegante con notas de cassis y cedro · 2018",
+              "price": 95.00,
+              "arModel": "cabernet",
+              "chefRecommendation": true,
+              "isVegan": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "rioja",
+              "name": "Rioja Reserva",
+              "description": "La Rioja, España · Tempranillo con notas de vainilla y cuero · 2017",
+              "price": 72.00,
+              "arModel": "rioja",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            }
+          ]
+        },
+        {
+          "title": "Champagne y Espumosos",
+          "items": [
+            {
+              "id": "champagne",
+              "name": "Dom Pérignon Vintage",
+              "description": "Champagne, Francia · Elegancia suprema con notas de brioche y cítricos",
+              "price": 320.00,
+              "arModel": "champagne",
+              "chefRecommendation": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "prosecco",
+              "name": "Prosecco Superiore DOCG",
+              "description": "Valdobbiadene, Italia · Fresco y afrutado con perlaje fino",
+              "price": 55.00,
+              "arModel": "prosecco",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "postres",
+      "name": "Postres",
+      "subtitle": "Dulces tentaciones",
+      "sections": [
+        {
+          "title": "Clásicos Reinventados",
+          "items": [
+            {
+              "id": "tiramisu",
+              "name": "Tiramisú Clásico",
+              "description": "Capas de mascarpone, savoiardi, espresso y cacao amargo",
+              "price": 14.00,
+              "arModel": "tiramisu",
+              "chefRecommendation": true,
+              "isVegetarian": true
+            },
+            {
+              "id": "creme-brulee",
+              "name": "Crème Brûlée de Vainilla",
+              "description": "Crema de vainilla de Madagascar con costra de caramelo crujiente",
+              "price": 12.00,
+              "arModel": "creme-brulee",
+              "chefRecommendation": false,
+              "isVegetarian": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "cheesecake",
+              "name": "Cheesecake New York",
+              "description": "Cremoso cheesecake con base de galleta y coulis de frutos rojos",
+              "price": 13.00,
+              "arModel": "cheesecake",
+              "chefRecommendation": false,
+              "isVegetarian": true
+            }
+          ]
+        },
+        {
+          "title": "Chocolates",
+          "items": [
+            {
+              "id": "fondant",
+              "name": "Fondant de Chocolate",
+              "description": "Bizcocho tibio con corazón fundido de chocolate 70% y helado de vainilla",
+              "price": 15.00,
+              "arModel": "fondant",
+              "chefRecommendation": true,
+              "isVegetarian": true
+            },
+            {
+              "id": "mousse",
+              "name": "Mousse de Chocolate Blanco",
+              "description": "Mousse aireada de chocolate blanco con frambuesas frescas y crumble",
+              "price": 12.00,
+              "arModel": "mousse",
+              "chefRecommendation": false,
+              "isVegetarian": true
+            },
+            {
+              "id": "tarta",
+              "name": "Tarta de Chocolate y Caramelo",
+              "description": "Ganache de chocolate negro, caramelo salado y nueces caramelizadas",
+              "price": 14.00,
+              "arModel": "tarta",
+              "chefRecommendation": false,
+              "isVegetarian": true
+            }
+          ]
+        },
+        {
+          "title": "Frescos y Frutales",
+          "items": [
+            {
+              "id": "panna-cotta",
+              "name": "Panna Cotta de Coco",
+              "description": "Cremosa panna cotta de coco con mango fresco y maracuyá",
+              "price": 11.00,
+              "arModel": "panna-cotta",
+              "chefRecommendation": false,
+              "isVegetarian": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "sorbete",
+              "name": "Trío de Sorbetes",
+              "description": "Limón, frambuesa y mango con galleta de almendras",
+              "price": 10.00,
+              "arModel": "sorbete",
+              "chefRecommendation": false,
+              "isVegan": true,
+              "isGlutenFree": true
+            },
+            {
+              "id": "tarta-frutas",
+              "name": "Tarta de Frutas de Temporada",
+              "description": "Base de hojaldre crujiente, crema pastelera y selección de frutas frescas",
+              "price": 13.00,
+              "arModel": "tarta-frutas",
+              "chefRecommendation": false,
+              "isVegetarian": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
