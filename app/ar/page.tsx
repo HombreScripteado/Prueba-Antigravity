@@ -21,7 +21,8 @@ function ARViewerContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const modelo = searchParams.get("modelo") || "default"
-  const modelPath = `/modelos/${modelo}.glb`
+  const [retryCount, setRetryCount] = useState(0)
+  const modelPath = `/modelos/${modelo}.glb${retryCount > 0 ? `?retry=${retryCount}` : ""}`
 
   const [arState, setArState] = useState<"idle" | "loading" | "active" | "error" | "denied">("idle")
   const [errorMessage, setErrorMessage] = useState<string>("")
@@ -47,10 +48,26 @@ function ARViewerContent() {
     }
   }, [])
 
+  // Timer para carga del modelo 3D (7 segundos)
+  useEffect(() => {
+    if (modelLoaded || arState === "error" || arState === "denied") {
+      return
+    }
+
+    const timer = setTimeout(() => {
+      if (!modelLoaded) {
+        setArState("error")
+        setErrorMessage("Tiempo de espera agotado al cargar el modelo 3D. Verifica tu conexión o intenta de nuevo.")
+      }
+    }, 7000)
+
+    return () => clearTimeout(timer)
+  }, [modelLoaded, arState, retryCount])
+
   // Simulated progress: increment from 0 to 90% automatically, model load event completes to 100%
   useEffect(() => {
-    if (modelLoaded) {
-      // Model already loaded, clear interval
+    if (modelLoaded || arState === "error" || arState === "denied") {
+      // Model already loaded or error occurred, clear interval
       if (simulatedProgressRef.current) {
         clearInterval(simulatedProgressRef.current)
       }
@@ -75,7 +92,7 @@ function ARViewerContent() {
         clearInterval(simulatedProgressRef.current)
       }
     }
-  }, [modelLoaded])
+  }, [modelLoaded, arState, retryCount])
 
   const handleActivateAR = useCallback(async () => {
     if (!internalViewerRef.current || !modelLoaded) return
@@ -106,11 +123,19 @@ function ARViewerContent() {
   const handleRetryPermission = useCallback(async () => {
     setArState("idle")
     setErrorMessage("")
-    // Small delay before retrying
+
+    if (!modelLoaded) {
+      // Es un error de carga del modelo, reiniciamos progreso e intentamos recargar
+      setModelLoadProgress(0)
+      setRetryCount((prev) => prev + 1)
+      return
+    }
+
+    // Small delay before retrying AR
     setTimeout(() => {
       handleActivateAR()
     }, 500)
-  }, [handleActivateAR])
+  }, [handleActivateAR, modelLoaded])
 
   const handleARStatus = useCallback((event: CustomEvent) => {
     const status = event.detail.status

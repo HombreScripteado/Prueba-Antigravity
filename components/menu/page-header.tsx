@@ -5,7 +5,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
   return (
-    <header className="text-center mb-12 pb-8 border-b border-menu-gold/20">
+    <header className="text-center mb-1 pb-8 border-b border-menu-gold/20">
       <h1 className="text-[clamp(2rem,6vw,3rem)] font-light tracking-[0.15em] uppercase text-menu-gold mb-2">
         {title}
       </h1>
