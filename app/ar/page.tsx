@@ -53,17 +53,25 @@ function ARViewerContent() {
     
     async function fetchUrl() {
       setUrlStatus("fetching")
-      const result = await getARModelSignedUrl(id as string)
-      if (!isMounted) return
-      
-      if (result.success) {
-        // Appending retry cache bust for subsequent fetches
-        setModelPath(result.url + (retryCount > 0 ? `&retry=${retryCount}` : ""))
-        setUrlStatus("success")
-      } else {
-        // Error logged to Supabase inside action
-         setUrlStatus("error")
-         setArState("error")
+      try {
+        const result = await getARModelSignedUrl(id as string)
+        if (!isMounted) return
+        
+        if (result.success) {
+          // Appending retry cache bust for subsequent fetches
+          setModelPath(result.url + (retryCount > 0 ? `&retry=${retryCount}` : ""))
+          setUrlStatus("success")
+        } else {
+          // Error logged to Supabase inside action
+           setUrlStatus("error")
+           setArState("error")
+        }
+      } catch (error) {
+        if (!isMounted) return
+        console.error("Critical error invoking Server Action:", error)
+        setUrlStatus("error")
+        setArState("error")
+        setErrorMessage("Lamentamos que este plato no está disponible en este momento para ver en AR.")
       }
     }
     
