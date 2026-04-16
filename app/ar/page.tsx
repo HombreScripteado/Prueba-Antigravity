@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation"
 import { Suspense, useEffect, useState, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
+import { getARModelSignedUrl, recordARView, recordARError } from "@/app/actions/ar"
 
 // Import model-viewer dynamically to avoid SSR issues
 const ModelViewerWrapper = dynamic(() => import("@/components/ar/model-viewer-wrapper"), {
@@ -20,9 +21,12 @@ const ModelViewerWrapper = dynamic(() => import("@/components/ar/model-viewer-wr
 function ARViewerContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const modelo = searchParams.get("modelo") || "default"
+  const id = searchParams.get("id")
+  const menuName = searchParams.get("name") || "Plato"
   const [retryCount, setRetryCount] = useState(0)
-  const modelPath = `/modelos/${modelo}.glb${retryCount > 0 ? `?retry=${retryCount}` : ""}`
+  
+  const [modelPath, setModelPath] = useState<string>("")
+  const [urlStatus, setUrlStatus] = useState<"fetching" | "success" | "error">("fetching")
 
   const [arState, setArState] = useState<"idle" | "loading" | "active" | "error" | "denied">("idle")
   const [errorMessage, setErrorMessage] = useState<string>("")
@@ -31,10 +35,42 @@ function ARViewerContent() {
   const internalViewerRef = useRef<HTMLElement | null>(null)
   const arTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const simulatedProgressRef = useRef<NodeJS.Timeout | null>(null)
+  const sessionStartTimeRef = useRef<number | null>(null)
 
   const handleBackToMenu = useCallback(() => {
     router.push("/comidas")
   }, [router])
+
+  // Fetch Signed URL from Supabase backend
+  useEffect(() => {
+    if (!id) {
+       setUrlStatus("error")
+       setArState("error")
+       return
+    }
+    
+    let isMounted = true
+    
+    async function fetchUrl() {
+      setUrlStatus("fetching")
+      const result = await getARModelSignedUrl(id as string)
+      if (!isMounted) return
+      
+      if (result.success) {
+        // Appending retry cache bust for subsequent fetches
+        setModelPath(result.url + (retryCount > 0 ? `&retry=${retryCount}` : ""))
+        setUrlStatus("success")
+      } else {
+        // Error logged to Supabase inside action
+         setUrlStatus("error")
+         setArState("error")
+      }
+    }
+    
+    fetchUrl()
+    
+    return () => { isMounted = false }
+  }, [id, retryCount])
 
   // Clear timeouts on unmount
   useEffect(() => {
@@ -58,11 +94,14 @@ function ARViewerContent() {
       if (!modelLoaded) {
         setArState("error")
         setErrorMessage("Tiempo de espera agotado al cargar el modelo 3D. Verifica tu conexión o intenta de nuevo.")
+        if (id) {
+          recordARError(id, "Tiempo de espera agotado al descargar el modelo 3D (Timeout 7s).")
+        }
       }
     }, 7000)
 
     return () => clearTimeout(timer)
-  }, [modelLoaded, arState, retryCount])
+  }, [modelLoaded, arState, retryCount, urlStatus, id])
 
   // Simulated progress: increment from 0 to 90% automatically, model load event completes to 100%
   useEffect(() => {
@@ -92,7 +131,7 @@ function ARViewerContent() {
         clearInterval(simulatedProgressRef.current)
       }
     }
-  }, [modelLoaded, arState, retryCount])
+  }, [modelLoaded, arState, retryCount, urlStatus])
 
   const handleActivateAR = useCallback(async () => {
     if (!internalViewerRef.current || !modelLoaded) return
@@ -105,18 +144,20 @@ function ARViewerContent() {
       if (arState === "loading") {
         setArState("error")
         setErrorMessage("Hubo un problema al iniciar la cámara. Inténtalo de nuevo.")
+        if (id) recordARError(id as string, "Timeout al intentar iniciar la cámara para AR.")
       }
     }, 5000)
 
     try {
       // @ts-expect-error model-viewer methods
       await internalViewerRef.current.activateAR()
-    } catch {
+    } catch (e: any) {
       if (arTimeoutRef.current) {
         clearTimeout(arTimeoutRef.current)
       }
       setArState("error")
       setErrorMessage("No se pudo iniciar la experiencia AR. Verifica que tu dispositivo sea compatible.")
+      if (id) recordARError(id as string, `Excepción al invocar activateAR: ${e?.message || 'Unknown'}`)
     }
   }, [modelLoaded, arState])
 
@@ -148,13 +189,20 @@ function ARViewerContent() {
 
     if (status === "session-started") {
       setArState("active")
+      sessionStartTimeRef.current = Date.now()
     } else if (status === "not-presenting") {
       setArState("idle")
+      if (sessionStartTimeRef.current && id) {
+        const durationSeconds = (Date.now() - sessionStartTimeRef.current) / 1000
+        recordARView(id as string, durationSeconds)
+      }
+      sessionStartTimeRef.current = null
     } else if (status === "failed") {
       setArState("error")
       setErrorMessage("Hubo un problema al iniciar la cámara. Inténtalo de nuevo.")
+      if (id) recordARError(id as string, "Fallo emitido por el evento ar-status (failed).")
     }
-  }, [arState])
+  }, [arState, id])
 
   const handleARError = useCallback((event: CustomEvent) => {
     const error = event.detail
@@ -169,14 +217,17 @@ function ARViewerContent() {
     if (error?.message?.includes("camera") || error?.message?.includes("permission") || error?.message?.includes("NotAllowedError")) {
       setArState("denied")
       setErrorMessage("Para ver el plato en tu mesa, necesitamos acceso a la cámara.")
+      if(id) recordARError(id as string, `Permiso de cámara denegado: ${error.message}`)
     } else if (error?.message?.includes("not supported") || error?.message?.includes("WebXR")) {
       setArState("error")
       setErrorMessage("Tu dispositivo no soporta experiencias de Realidad Aumentada.")
+      if(id) recordARError(id as string, `Dispositivo no soportado: ${error.message}`)
     } else {
       setArState("error")
       setErrorMessage("Ocurrió un error al cargar la experiencia AR. Por favor, intenta nuevamente.")
+      if(id) recordARError(id as string, `Error inesperado devuelto por model-viewer: ${error?.message || "Desconocido"}`)
     }
-  }, [])
+  }, [id])
 
   // Handle model load event - completes the simulated progress
   const handleModelLoad = useCallback(() => {
@@ -201,19 +252,20 @@ function ARViewerContent() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-menu-bg">
-      {/* Model Viewer - always rendered (never hidden) to allow asset download */}
-      <ModelViewerWrapper
-        ref={modelViewerRef}
-        src={modelPath}
-        arModes="webxr scene-viewer quick-look"
-        arPlacement="floor"
-        arScale="auto"
-        cameraControls={false}
-        autoRotate={false}
-        className="h-full w-full absolute inset-0"
-      >
-        {/* Custom AR UI Overlay */}
-        <div slot="ar-ui" className="absolute inset-0 pointer-events-auto">
+      {/* Model Viewer - Render only when URL is successfully generated */}
+      {urlStatus === "success" && (
+        <ModelViewerWrapper
+          ref={modelViewerRef}
+          src={modelPath}
+          arModes="webxr scene-viewer quick-look"
+          arPlacement="floor"
+          arScale="auto"
+          cameraControls={false}
+          autoRotate={false}
+          className="h-full w-full absolute inset-0"
+        >
+          {/* Custom AR UI Overlay */}
+          <div slot="ar-ui" className="absolute inset-0 pointer-events-auto">
           {/* Back button - top left */}
           <button
             onClick={handleBackToMenu}
@@ -234,6 +286,7 @@ function ARViewerContent() {
           </div>
         </div>
       </ModelViewerWrapper>
+      )}
 
       {/* Initial UI - shown when AR is not active */}
       {arState !== "active" && (
@@ -273,21 +326,21 @@ function ARViewerContent() {
 
             {/* Model name */}
             <h1 className="mb-2 font-serif text-3xl font-light tracking-wide text-menu-cream capitalize">
-              {modelo.replace(/-/g, " ")}
+              {menuName}
             </h1>
             <div className="mb-8 h-px w-24 bg-gradient-to-r from-transparent via-menu-gold to-transparent" />
 
             {/* Loading progress indicator */}
-            {!modelLoaded && (
+            {(!modelLoaded || urlStatus === "fetching") && urlStatus !== "error" && (
               <div className="mb-6 w-48">
                 <div className="h-1 w-full bg-menu-gold/20 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-menu-gold transition-all duration-300 rounded-full"
-                    style={{ width: `${Math.round(modelLoadProgress)}%` }}
+                    style={{ width: `${Math.round(urlStatus === "fetching" ? 10 : modelLoadProgress)}%` }}
                   />
                 </div>
                 <p className="mt-2 font-mono text-xs tracking-wide text-menu-cream/50">
-                  Cargando plato... {Math.round(modelLoadProgress)}%
+                  {urlStatus === "fetching" ? "Obteniendo modelo seguro..." : `Cargando plato... ${Math.round(modelLoadProgress)}%`}
                 </p>
               </div>
             )}
@@ -319,15 +372,19 @@ function ARViewerContent() {
             {arState === "error" && (
               <div className="mb-8 max-w-sm">
                 <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-                  <p className="font-serif text-lg text-menu-cream">{errorMessage}</p>
+                  <p className="font-serif text-lg text-menu-cream">
+                    {urlStatus === "error" ? "Lamentamos que este plato no está disponible en este momento para ver en AR." : errorMessage}
+                  </p>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <button
-                    onClick={handleRetryPermission}
-                    className="w-full rounded-sm border border-menu-gold bg-menu-gold px-8 py-4 font-mono text-sm tracking-widest text-menu-bg transition-all hover:bg-menu-gold-light"
-                  >
-                    REINTENTAR
-                  </button>
+                  {urlStatus !== "error" && (
+                    <button
+                      onClick={handleRetryPermission}
+                      className="w-full rounded-sm border border-menu-gold bg-menu-gold px-8 py-4 font-mono text-sm tracking-widest text-menu-bg transition-all hover:bg-menu-gold-light"
+                    >
+                      REINTENTAR
+                    </button>
+                  )}
                   <button
                     onClick={handleBackToMenu}
                     className="w-full rounded-sm border border-menu-gold/50 bg-transparent px-8 py-4 font-mono text-sm tracking-widest text-menu-gold transition-all hover:border-menu-gold hover:bg-menu-gold/10"
@@ -339,7 +396,7 @@ function ARViewerContent() {
             )}
 
             {/* Idle State - Main CTA */}
-            {(arState === "idle" || arState === "loading") && (
+            {(arState === "idle" || arState === "loading") && urlStatus === "success" && (
               <>
                 <button
                   onClick={handleActivateAR}

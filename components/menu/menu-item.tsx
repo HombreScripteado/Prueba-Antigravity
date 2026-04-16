@@ -7,7 +7,7 @@ interface MenuItemProps {
   name: string
   description: string
   price: number
-  arModel?: string
+  hasAR?: boolean
   chefRecommendation?: boolean
   currency?: string
   isVegetarian?: boolean
@@ -16,19 +16,19 @@ interface MenuItemProps {
 }
 
 export function MenuItem({
+  id,
   name,
   description,
   price,
-  arModel,
+  hasAR = false,
   chefRecommendation = false,
   currency = "$",
   isVegetarian = false,
   isVegan = false,
   isGlutenFree = false
 }: MenuItemProps) {
-  // Build the AR page URL with the model parameter
-  const hasAR = Boolean(arModel)
-  const arUrl = arModel ? `/ar?modelo=${encodeURIComponent(arModel)}` : "#"
+  // Build the AR page URL with the dish ID and name
+  const arUrl = hasAR ? `/ar?id=${id}&name=${encodeURIComponent(name)}` : "#"
 
   const hasDietaryInfo = isVegetarian || isVegan || isGlutenFree
 

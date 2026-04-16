@@ -14,7 +14,7 @@
               "name": "Carpaccio de Res",
               "description": "Finas láminas de res con rúcula, parmesano y vinagreta de trufa",
               "price": 18.00,
-              "arModel": "carpaccio",
+              "hasAR": true,
               "chefRecommendation": false,
               "isGlutenFree": true
             },
@@ -23,7 +23,7 @@
               "name": "Ceviche de Lubina",
               "description": "Lubina fresca marinada en cítricos con leche de tigre y camote",
               "price": 22.00,
-              "arModel": "ceviche",
+              "hasAR": true,
               "chefRecommendation": false,
               "isGlutenFree": true
             },
@@ -32,7 +32,7 @@
               "name": "Burrata Caprese",
               "description": "Burrata cremosa con tomates heirloom, albahaca y reducción de balsámico",
               "price": 16.00,
-              "arModel": "burrata",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true,
               "isGlutenFree": true
@@ -47,7 +47,7 @@
               "name": "Ribeye Premium",
               "description": "Corte de 400g madurado 28 días, con mantequilla de hierbas y papas trufadas",
               "price": 58.00,
-              "arModel": "ribeye",
+              "hasAR": true,
               "chefRecommendation": true,
               "isGlutenFree": true
             },
@@ -56,7 +56,7 @@
               "name": "Salmón Noruego",
               "description": "Filete de salmón glaseado con miso, bok choy y arroz jazmín",
               "price": 42.00,
-              "arModel": "salmon",
+              "hasAR": true,
               "chefRecommendation": false,
               "isGlutenFree": true
             },
@@ -65,7 +65,7 @@
               "name": "Risotto de Hongos",
               "description": "Arborio cremoso con porcini, champiñones silvestres y aceite de trufa",
               "price": 34.00,
-              "arModel": "risotto",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true,
               "isGlutenFree": true
@@ -75,7 +75,7 @@
               "name": "Magret de Pato",
               "description": "Pechuga de pato con salsa de frutos rojos, puré de castañas y vegetales glaseados",
               "price": 46.00,
-              "arModel": "pato",
+              "hasAR": true,
               "chefRecommendation": false,
               "isGlutenFree": true
             },
@@ -84,7 +84,7 @@
               "name": "Carré de Cordero",
               "description": "Costillas de cordero con costra de hierbas, ratatouille y jus de romero",
               "price": 52.00,
-              "arModel": "cordero",
+              "hasAR": true,
               "chefRecommendation": false
             }
           ]
@@ -104,7 +104,7 @@
               "name": "Old Fashioned Premium",
               "description": "Bourbon añejo, bitter aromático, azúcar moreno y twist de naranja",
               "price": 16.00,
-              "arModel": "old-fashioned",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -114,7 +114,7 @@
               "name": "Negroni Reserva",
               "description": "Gin premium, Campari, vermut rojo y naranja deshidratada",
               "price": 15.00,
-              "arModel": "negroni",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -124,7 +124,7 @@
               "name": "Espresso Martini",
               "description": "Vodka, licor de café, espresso fresco y granos de café",
               "price": 14.00,
-              "arModel": "espresso-martini",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -134,7 +134,7 @@
               "name": "Mojito de la Casa",
               "description": "Ron blanco premium, hierbabuena fresca, lima y soda artesanal",
               "price": 13.00,
-              "arModel": "mojito",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -149,7 +149,7 @@
               "name": "Malbec Reserva",
               "description": "Mendoza, Argentina · Notas de ciruela, mora y especias · 2019",
               "price": 65.00,
-              "arModel": "malbec",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -159,7 +159,7 @@
               "name": "Cabernet Sauvignon Gran Reserva",
               "description": "Napa Valley, USA · Elegante con notas de cassis y cedro · 2018",
               "price": 95.00,
-              "arModel": "cabernet",
+              "hasAR": true,
               "chefRecommendation": true,
               "isVegan": true,
               "isGlutenFree": true
@@ -169,7 +169,7 @@
               "name": "Rioja Reserva",
               "description": "La Rioja, España · Tempranillo con notas de vainilla y cuero · 2017",
               "price": 72.00,
-              "arModel": "rioja",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -184,7 +184,7 @@
               "name": "Dom Pérignon Vintage",
               "description": "Champagne, Francia · Elegancia suprema con notas de brioche y cítricos",
               "price": 320.00,
-              "arModel": "champagne",
+              "hasAR": true,
               "chefRecommendation": true,
               "isGlutenFree": true
             },
@@ -193,7 +193,7 @@
               "name": "Prosecco Superiore DOCG",
               "description": "Valdobbiadene, Italia · Fresco y afrutado con perlaje fino",
               "price": 55.00,
-              "arModel": "prosecco",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -215,7 +215,7 @@
               "name": "Tiramisú Clásico",
               "description": "Capas de mascarpone, savoiardi, espresso y cacao amargo",
               "price": 14.00,
-              "arModel": "tiramisu",
+              "hasAR": true,
               "chefRecommendation": true,
               "isVegetarian": true
             },
@@ -224,7 +224,7 @@
               "name": "Crème Brûlée de Vainilla",
               "description": "Crema de vainilla de Madagascar con costra de caramelo crujiente",
               "price": 12.00,
-              "arModel": "creme-brulee",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true,
               "isGlutenFree": true
@@ -234,7 +234,7 @@
               "name": "Cheesecake New York",
               "description": "Cremoso cheesecake con base de galleta y coulis de frutos rojos",
               "price": 13.00,
-              "arModel": "cheesecake",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true
             }
@@ -248,7 +248,7 @@
               "name": "Fondant de Chocolate",
               "description": "Bizcocho tibio con corazón fundido de chocolate 70% y helado de vainilla",
               "price": 15.00,
-              "arModel": "fondant",
+              "hasAR": true,
               "chefRecommendation": true,
               "isVegetarian": true
             },
@@ -257,7 +257,7 @@
               "name": "Mousse de Chocolate Blanco",
               "description": "Mousse aireada de chocolate blanco con frambuesas frescas y crumble",
               "price": 12.00,
-              "arModel": "mousse",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true
             },
@@ -266,7 +266,7 @@
               "name": "Tarta de Chocolate y Caramelo",
               "description": "Ganache de chocolate negro, caramelo salado y nueces caramelizadas",
               "price": 14.00,
-              "arModel": "tarta",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true
             }
@@ -280,7 +280,7 @@
               "name": "Panna Cotta de Coco",
               "description": "Cremosa panna cotta de coco con mango fresco y maracuyá",
               "price": 11.00,
-              "arModel": "panna-cotta",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true,
               "isGlutenFree": true
@@ -290,7 +290,7 @@
               "name": "Trío de Sorbetes",
               "description": "Limón, frambuesa y mango con galleta de almendras",
               "price": 10.00,
-              "arModel": "sorbete",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegan": true,
               "isGlutenFree": true
@@ -300,7 +300,7 @@
               "name": "Tarta de Frutas de Temporada",
               "description": "Base de hojaldre crujiente, crema pastelera y selección de frutas frescas",
               "price": 13.00,
-              "arModel": "tarta-frutas",
+              "hasAR": true,
               "chefRecommendation": false,
               "isVegetarian": true
             }

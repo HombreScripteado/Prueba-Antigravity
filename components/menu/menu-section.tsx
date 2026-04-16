@@ -7,8 +7,11 @@ interface MenuSectionProps {
     name: string
     description: string
     price: number
-    arModel: string
+    hasAR?: boolean
     chefRecommendation?: boolean
+    isVegetarian?: boolean
+    isVegan?: boolean
+    isGlutenFree?: boolean
   }[]
 }
 
