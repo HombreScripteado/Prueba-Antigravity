@@ -19,7 +19,7 @@
               "isGlutenFree": true
             },
             {
-              "id": "ceviche",
+              "id": "31b19826-b890-4324-afb3-c2589cae3b48",
               "name": "Ceviche de Lubina",
               "description": "Lubina fresca marinada en cítricos con leche de tigre y camote",
               "price": 22.00,
@@ -28,7 +28,7 @@
               "isGlutenFree": true
             },
             {
-              "id": "burrata",
+              "id": "405c76b9-5303-4b63-91c1-d53bb165b76b",
               "name": "Burrata Caprese",
               "description": "Burrata cremosa con tomates heirloom, albahaca y reducción de balsámico",
               "price": 16.00,
