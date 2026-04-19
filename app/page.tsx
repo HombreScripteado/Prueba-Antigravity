@@ -10,7 +10,7 @@ export default async function HomePage() {
   const categories = menuData?.categories || []
 
   return (
-    <div className="menu-bg-gradient min-h-screen flex flex-col items-center justify-center p-8 relative overflow-x-hidden">
+    <div className="bg-black min-h-screen flex flex-col items-center justify-center p-8 relative overflow-x-hidden">
       <CornerDecorations />
       
       <div className="max-w-lg w-full text-center relative z-10">
