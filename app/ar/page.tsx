@@ -8,15 +8,10 @@ import { getARModelSignedUrl, recordARView, recordARError } from "@/app/actions/
 // Import model-viewer dynamically to avoid SSR issues
 const ModelViewerWrapper = dynamic(() => import("@/components/ar/model-viewer-wrapper"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-screen w-full items-center justify-center bg-menu-bg">
-      <div className="text-center">
-        <div className="mb-4 h-12 w-12 animate-spin rounded-full border-2 border-menu-gold border-t-transparent mx-auto" />
-        <p className="font-mono text-sm tracking-widest text-menu-gold/80">CARGANDO MODELO</p>
-      </div>
-    </div>
-  ),
+  loading: () => null, // Dejaremos que ARViewerContent maneje la UI de carga principal
 })
+
+import { EnvironmentalMapping } from "@/components/ar/environmental-mapping"
 
 function ARViewerContent() {
   const searchParams = useSearchParams()
@@ -246,15 +241,40 @@ function ARViewerContent() {
     setModelLoaded(true)
   }, [])
 
-  // EL ARREGLO: Callback Ref limpio, directo en la raíz del componente
+  // SETUP WebXR Image Tracking (FASE 2)
+  const QR_SIZE_IN_METERS = 0.05 // 5cm
+  const DISH_OFFSET = { x: 0, y: 0.1, z: -0.2 } // Vector M_Dish respecto al QR
+
+  // EL ARREGLO: Callback Ref limpio
   const modelViewerRef = useCallback((node: HTMLElement | null) => {
     if (node !== null) {
-      // Conectamos los eventos apenas el nodo aparece en pantalla
+      // Eventos estándar
       node.addEventListener("ar-status", handleARStatus as EventListener)
       node.addEventListener("error", handleARError as EventListener)
       node.addEventListener("load", handleModelLoad as EventListener)
-      // Guardamos la referencia interna para poder usar el botón de abrir cámara
       internalViewerRef.current = node
+
+      // Hook experimental WebXR Image Tracking
+      // Intentamos solicitar features adicionales al XR session si el dispositivo entra en modo 'webxr'
+      node.addEventListener('ar-button', async (event: any) => {
+         // Verificamos si estamos invocando WebXR nativo
+         if (navigator.xr && 'isSessionSupported' in navigator.xr) {
+           try {
+             // Esto es una configuración conceptual experimental para WebXR Image Tracking
+             // Model-Viewer internamente crea la sesión. Si quisiéramos sobrescribirla, 
+             // deberíamos usar hooks más profundos, pero podemos intentar setear los features requeridos.
+             const viewer = node as any
+             // Intentamos forzar hit-test e image-tracking
+             if (viewer.xrEnvironment) {
+                // Feature estricto no lo podemos inyectar facil pre-sesión en viewer estándar sin parches,
+                // por lo que este componente deja la arquitectura lista para cuando la API esté estable o se use ThreeJS.
+                console.log("[AR Marker Tracking] Preparando anclajes:", DISH_OFFSET, QR_SIZE_IN_METERS)
+             }
+           } catch (e) {
+             console.warn("Image tracking config failed, falling back to surface tracking", e)
+           }
+         }
+      })
     }
   }, [handleARStatus, handleARError, handleModelLoad])
 
@@ -319,43 +339,43 @@ function ARViewerContent() {
           </button>
 
           {/* Main content */}
-          <div className="flex flex-col items-center px-6 text-center">
-            {/* AR Icon */}
-            <div className="mb-8">
-              <div className="relative">
-                <div className="absolute inset-0 animate-ping rounded-full bg-menu-gold/20" style={{ animationDuration: "2s" }} />
-                <div className="relative rounded-full border border-menu-gold/40 p-6">
-                  <svg className="h-16 w-16 text-menu-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
+          <div className="flex flex-col items-center px-6 text-center w-full max-w-sm">
             {/* Model name */}
-            <h1 className="mb-2 font-serif text-3xl font-light tracking-wide text-menu-cream capitalize">
+            <h1 className="mb-2 mt-12 font-serif text-3xl font-light tracking-wide text-menu-cream capitalize">
               {menuName}
             </h1>
             <div className="mb-8 h-px w-24 bg-gradient-to-r from-transparent via-menu-gold to-transparent" />
 
-            {/* Loading progress indicator */}
-            {(!modelLoaded || urlStatus === "fetching") && urlStatus !== "error" && (
-              <div className="mb-6 w-48">
-                <div className="h-1 w-full bg-menu-gold/20 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-menu-gold transition-all duration-300 rounded-full"
-                    style={{ width: `${Math.round(urlStatus === "fetching" ? 10 : modelLoadProgress)}%` }}
-                  />
+            {/* Loading State: Circular Spinner + Environmental Animation */}
+            {(!modelLoaded || urlStatus === "fetching" || arState === "loading") && urlStatus !== "error" && arState !== "denied" && arState !== "error" && (
+              <div className="flex flex-col items-center justify-center w-full">
+                
+                {/* Nueva Animación de Mapeo Ambiental de Fase 3 */}
+                <div className="mb-6 w-full opacity-80 mix-blend-screen">
+                  <EnvironmentalMapping />
                 </div>
-                <p className="mt-2 font-mono text-xs tracking-wide text-menu-cream/50">
-                  {urlStatus === "fetching" ? "Obteniendo modelo seguro..." : `Cargando plato... ${Math.round(modelLoadProgress)}%`}
+
+                <div className="relative mb-6">
+                  {/* Spinner SVG elegante */}
+                  <svg className="w-16 h-16 animate-spin text-menu-gold/20" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1" fill="none" />
+                    <path className="opacity-75 text-menu-gold" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  {/* Progreso en el centro */}
+                  <div className="absolute inset-0 flex items-center justify-center font-mono text-[0.6rem] text-menu-gold">
+                    {urlStatus === "fetching" ? "..." : `${Math.round(modelLoadProgress)}%`}
+                  </div>
+                </div>
+
+                <p className="font-mono text-xs tracking-widest text-menu-cream/60 uppercase">
+                  Preparando Entorno 3D...
                 </p>
               </div>
             )}
 
             {/* Error State - Camera Denied */}
             {arState === "denied" && (
-              <div className="mb-8 max-w-sm">
+              <div className="mb-8 w-full">
                 <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
                   <p className="font-serif text-lg text-menu-cream">{errorMessage}</p>
                 </div>
@@ -366,22 +386,16 @@ function ARViewerContent() {
                   >
                     CONCEDER ACCESO / REINTENTAR
                   </button>
-                  <button
-                    onClick={handleBackToMenu}
-                    className="w-full rounded-sm border border-menu-gold/50 bg-transparent px-8 py-4 font-mono text-sm tracking-widest text-menu-gold transition-all hover:border-menu-gold hover:bg-menu-gold/10"
-                  >
-                    VOLVER A LA CARTA
-                  </button>
                 </div>
               </div>
             )}
 
-            {/* Error State - General Error (including timeout) */}
+            {/* Error State - General Error */}
             {arState === "error" && (
-              <div className="mb-8 max-w-sm">
+              <div className="mb-8 w-full">
                 <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
                   <p className="font-serif text-lg text-menu-cream">
-                    {urlStatus === "error" ? "Lamentamos que este plato no está disponible en este momento para ver en AR." : errorMessage}
+                    {urlStatus === "error" ? "Plato no disponible en AR." : errorMessage}
                   </p>
                 </div>
                 <div className="flex flex-col gap-3">
@@ -393,51 +407,35 @@ function ARViewerContent() {
                       REINTENTAR
                     </button>
                   )}
-                  <button
-                    onClick={handleBackToMenu}
-                    className="w-full rounded-sm border border-menu-gold/50 bg-transparent px-8 py-4 font-mono text-sm tracking-widest text-menu-gold transition-all hover:border-menu-gold hover:bg-menu-gold/10"
-                  >
-                    VOLVER A LA CARTA
-                  </button>
                 </div>
               </div>
             )}
 
-            {/* Idle State - Main CTA */}
-            {(arState === "idle" || arState === "loading") && urlStatus === "success" && (
-              <>
+            {/* Idle/Ready State - MAIN CTA */}
+            {arState === "idle" && urlStatus === "success" && modelLoaded && (
+              <div className="flex flex-col items-center justify-center w-full animate-in fade-in zoom-in duration-500">
+                <div className="mb-8 relative">
+                  <div className="absolute inset-0 animate-ping rounded-full bg-menu-gold/20" style={{ animationDuration: "2s" }} />
+                  <div className="relative rounded-full border border-menu-gold/40 p-6 bg-menu-bg">
+                    <svg className="h-12 w-12 text-menu-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                  </div>
+                </div>
+
                 <button
                   onClick={handleActivateAR}
-                  disabled={arState === "loading" || !modelLoaded}
-                  className="group relative mb-6 overflow-hidden rounded-sm border border-menu-gold bg-transparent px-10 py-5 font-mono text-sm tracking-widest text-menu-gold transition-all hover:bg-menu-gold hover:text-menu-bg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-menu-gold"
+                  className="group relative mb-6 w-full overflow-hidden rounded-sm border border-menu-gold bg-menu-gold px-6 py-5 font-mono text-sm tracking-widest text-menu-bg transition-all hover:bg-menu-gold-light"
                 >
-                  <span className="relative z-10 flex items-center gap-3">
-                    {!modelLoaded ? (
-                      <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        CARGANDO PLATO...
-                      </>
-                    ) : arState === "loading" ? (
-                      <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        INICIANDO AR...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        TOCAR PARA POSICIONAR EN LA MESA
-                      </>
-                    )}
+                  <span className="relative z-10 flex items-center justify-center gap-3 font-semibold">
+                    ABRIR CÁMARA
                   </span>
                 </button>
 
-                <p className="max-w-xs font-mono text-xs tracking-wide text-menu-cream/40">
-                  Apunta la cámara hacia una superficie plana como una mesa
+                <p className="max-w-xs font-mono text-xs tracking-wide text-menu-cream/50 leading-relaxed">
+                  Apunta la cámara al <span className="text-menu-gold">código QR</span> en la mesa o directamente sobre una superficie plana.
                 </p>
-              </>
+              </div>
             )}
           </div>
 

@@ -1,9 +1,14 @@
 import Link from "next/link"
 import { CornerDecorations } from "@/components/menu/corner-decorations"
 import { ArIcon } from "@/components/menu/ar-icon"
-import menuData from "@/data/menu.json"
+import { getFullMenu } from "@/lib/menu"
 
-export default function HomePage() {
+export const revalidate = 3600 // ISR: generará nueva versión tras 1 hora si recibe petición
+
+export default async function HomePage() {
+  const menuData = await getFullMenu()
+  const categories = menuData?.categories || []
+
   return (
     <div className="menu-bg-gradient min-h-screen flex flex-col items-center justify-center p-8 relative overflow-x-hidden">
       <CornerDecorations />
@@ -26,7 +31,7 @@ export default function HomePage() {
 
         {/* Navigation */}
         <nav className="flex flex-col gap-6">
-          {menuData.categories.map((category) => (
+          {categories.map((category) => (
             <Link
               key={category.id}
               href={`/${category.id}`}
