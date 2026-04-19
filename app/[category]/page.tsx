@@ -10,9 +10,9 @@ import { notFound } from "next/navigation"
 export const revalidate = 3600 // ISR: revalida con petición pasada una hora
 
 type Props = {
-  params: {
+  params: Promise<{
     category: string
-  }
+  }>
 }
 
 // Opcional: Para generar pre-estáticamente las páginas conocidas
@@ -22,7 +22,8 @@ export async function generateStaticParams() {
   return menuData.categories.map((c) => ({ category: c.id }))
 }
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage(props: Props) {
+  const params = await props.params
   const menuData = await getFullMenu()
   
   if (!menuData) return notFound()
