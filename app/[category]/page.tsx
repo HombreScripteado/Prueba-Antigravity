@@ -46,7 +46,7 @@ export default async function CategoryPage(props: Props) {
       {/* Sticky Rapid Navigation Menu */}
       {category.sections.length > 0 && (
         <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-y border-menu-gold/20 py-4 mt-6 mb-10 shadow-[0_10px_30px_rgba(0,0,0,0.9)]">
-          <div className="max-w-2xl mx-auto px-6 md:px-8 w-full overflow-x-auto scrollbar-hide">
+          <div className="max-w-2xl mx-auto px-6 md:px-8 w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {/* Scrollable Pills container */}
             <div className="flex items-center gap-3 w-max pb-1">
               {category.sections.map((section) => (

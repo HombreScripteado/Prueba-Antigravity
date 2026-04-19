@@ -13,6 +13,7 @@ interface MenuItemProps {
   isVegetarian?: boolean
   isVegan?: boolean
   isGlutenFree?: boolean
+  category_id?: string
 }
 
 export function MenuItem({
@@ -25,10 +26,11 @@ export function MenuItem({
   currency = "$",
   isVegetarian = false,
   isVegan = false,
-  isGlutenFree = false
+  isGlutenFree = false,
+  category_id
 }: MenuItemProps) {
-  // Build the AR page URL with the dish ID and name
-  const arUrl = hasAR ? `/ar?id=${id}&name=${encodeURIComponent(name)}` : "#"
+  // Build the AR page URL with the dish ID, name, and return route
+  const arUrl = hasAR ? `/ar?id=${id}&name=${encodeURIComponent(name)}${category_id ? `&returnTo=${category_id}` : ''}` : "#"
 
   const hasDietaryInfo = isVegetarian || isVegan || isGlutenFree
 

@@ -18,6 +18,7 @@ function ARViewerContent() {
   const router = useRouter()
   const id = searchParams.get("id")
   const menuName = searchParams.get("name") || "Plato"
+  const returnTo = searchParams.get("returnTo")
   const [retryCount, setRetryCount] = useState(0)
   
   const [modelPath, setModelPath] = useState<string>("")
@@ -33,8 +34,12 @@ function ARViewerContent() {
   const sessionStartTimeRef = useRef<number | null>(null)
 
   const handleBackToMenu = useCallback(() => {
-    router.push("/comidas")
-  }, [router])
+    if (returnTo) {
+      router.push(`/${returnTo}`)
+    } else {
+      router.push("/")
+    }
+  }, [router, returnTo])
 
   // Fetch Signed URL from Supabase backend
   useEffect(() => {
@@ -135,6 +140,25 @@ function ARViewerContent() {
       }
     }
   }, [modelLoaded, arState, retryCount, urlStatus])
+
+  // Descongelar el UI de AR si el usuario regresa de iOS Quick Look (Safari/Chrome hide tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setArState((current) => {
+          if (current === 'loading' || current === 'active') {
+            return 'idle';
+          }
+          return current;
+        });
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
 
   const handleActivateAR = useCallback(async () => {
     if (!internalViewerRef.current || !modelLoaded) return
