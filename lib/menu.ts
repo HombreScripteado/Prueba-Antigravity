@@ -53,6 +53,14 @@ export async function getFullMenu(): Promise<FullMenu | null> {
   // Agrupar platos por categoría y sección
   const categoriesMap = new Map<string, MenuCategory>()
 
+  // Fallback de subtítulos por si la base de datos los tiene vacíos
+  const SUBTITLE_FALLBACKS: Record<string, string> = {
+    "comidas": "PLATOS PRINCIPALES Y ENTRANTES",
+    "bebidas": "VINOS, CÓCTELES Y MÁS",
+    "postres": "DULCES TENTACIONES",
+    "entradas": "PARA EMPEZAR"
+  }
+
   for (const dish of (dishes as DishRecord[])) {
     // Si la DB tiene nulos en category_id por alguna razón, se omite o agrupa genéricamente.
     const catId = dish.category_id || "otros"
@@ -61,7 +69,7 @@ export async function getFullMenu(): Promise<FullMenu | null> {
       categoriesMap.set(catId, {
         id: catId,
         name: dish.category_name || "Otros Platos",
-        subtitle: dish.category_subtitle || "",
+        subtitle: dish.category_subtitle || SUBTITLE_FALLBACKS[catId] || "",
         sections: []
       })
     }

@@ -33,21 +33,49 @@ export default async function CategoryPage(props: Props) {
   if (!category) return notFound()
 
   return (
-    <div className="menu-bg-gradient min-h-screen p-8 relative">
+    <div className="bg-black min-h-screen relative pb-16">
       <CornerDecorations />
       
-      <div className="max-w-2xl mx-auto relative z-10">
+      {/* Top Header Section */}
+      <div className="max-w-2xl mx-auto relative z-10 pt-8 px-6 md:px-8">
         <BackLink />
         <PageHeader title={category.name} subtitle={category.subtitle || ""} />
-        
         <MenuLegend />
-        
+      </div>
+
+      {/* Sticky Rapid Navigation Menu */}
+      {category.sections.length > 0 && (
+        <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-y border-menu-gold/20 py-4 mt-6 mb-10 shadow-[0_10px_30px_rgba(0,0,0,0.9)]">
+          <div className="max-w-2xl mx-auto px-6 md:px-8 w-full overflow-x-auto scrollbar-hide">
+            {/* Scrollable Pills container */}
+            <div className="flex items-center gap-3 w-max pb-1">
+              {category.sections.map((section) => (
+                <a 
+                  key={section.title} 
+                  href={`#${section.title.replace(/\s+/g, '-')}`}
+                  className="px-5 py-2.5 rounded-full border border-menu-gold/30 bg-menu-bg/50 text-menu-cream font-mono text-[0.65rem] md:text-xs uppercase tracking-[0.15em] hover:bg-menu-gold hover:text-black hover:border-menu-gold transition-all duration-300 whitespace-nowrap"
+                >
+                  {section.title}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Sections rendering with Anchors */}
+      <div className="max-w-2xl mx-auto relative z-10 px-6 md:px-8">
         {category.sections.map((section) => (
-          <MenuSectionComponent
+          <div 
             key={section.title} 
-            title={section.title} 
-            items={section.items} 
-          />
+            id={section.title.replace(/\s+/g, '-')} 
+            className="scroll-mt-32"
+          >
+            <MenuSectionComponent
+              title={section.title} 
+              items={section.items} 
+            />
+          </div>
         ))}
         
         <PageFooter text="TOCA CUALQUIER PLATO PARA VER EN REALIDAD AUMENTADA" />
