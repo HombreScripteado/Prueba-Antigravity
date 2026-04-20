@@ -28,6 +28,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="scroll-smooth">
+      <head>
+        <link rel="preload" href="/HDRI/Diurno-Hotel.hdr" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/HDRI/Nocturno-Christmas.hdr" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/HDRI/Nocturno-Fireplace.hdr" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/HDRI/Nocturno-Studio.hdr" as="fetch" crossOrigin="anonymous" />
+      </head>
       <body className={`${_cormorant.variable} ${_montserrat.variable} font-serif antialiased`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

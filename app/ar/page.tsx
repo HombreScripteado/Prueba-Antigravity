@@ -21,6 +21,10 @@ function ARViewerContent() {
   const returnTo = searchParams.get("returnTo")
   const [retryCount, setRetryCount] = useState(0)
   
+  // Debug/Testing HDRI temporal
+  const [hdri, setHdri] = useState("/HDRI/Diurno-Hotel.hdr")
+  const [exposure, setExposure] = useState<number>(1)
+  
   const [modelPath, setModelPath] = useState<string>("")
   const [urlStatus, setUrlStatus] = useState<"fetching" | "success" | "error">("fetching")
 
@@ -314,6 +318,8 @@ function ARViewerContent() {
           arScale="auto"
           cameraControls={false}
           autoRotate={false}
+          environmentImage={hdri}
+          exposure={exposure}
           className="h-full w-full absolute inset-0"
         >
           {/* Custom AR UI Overlay */}
@@ -446,6 +452,39 @@ function ARViewerContent() {
                     </svg>
                   </div>
                 </div>
+
+                {/* SECCIÓN TEMPORAL DEBUG/TESTING HDRI */}
+                <div className="mb-6 w-full flex flex-col gap-3 p-4 border border-menu-gold/40 rounded-sm bg-menu-bg/80 relative z-50 pointer-events-auto">
+                  <p className="font-mono text-[10px] tracking-widest text-menu-gold text-center uppercase">Debug/Testing HDRI</p>
+                  
+                  <select 
+                    value={hdri}
+                    onChange={(e) => setHdri(e.target.value)}
+                    className="w-full bg-menu-bg border border-menu-gold/30 text-menu-cream font-mono text-xs p-2 rounded-sm focus:outline-none focus:border-menu-gold"
+                  >
+                    <option value="/HDRI/Diurno-Hotel.hdr">Diurno-Hotel</option>
+                    <option value="/HDRI/Nocturno-Christmas.hdr">Nocturno-Christmas</option>
+                    <option value="/HDRI/Nocturno-Fireplace.hdr">Nocturno-Fireplace</option>
+                    <option value="/HDRI/Nocturno-Studio.hdr">Nocturno-Studio</option>
+                  </select>
+
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between font-mono text-xs text-menu-cream/80">
+                      <span>Exposición</span>
+                      <span>{exposure.toFixed(1)}</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="0.5" 
+                      max="2.5" 
+                      step="0.1" 
+                      value={exposure}
+                      onChange={(e) => setExposure(parseFloat(e.target.value))}
+                      className="w-full accent-menu-gold"
+                    />
+                  </div>
+                </div>
+                {/* FIN SECCIÓN TEMPORAL */}
 
                 <button
                   onClick={handleActivateAR}

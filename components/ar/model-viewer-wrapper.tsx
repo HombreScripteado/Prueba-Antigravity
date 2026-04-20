@@ -37,6 +37,8 @@ interface ModelViewerWrapperProps {
   arScale?: string
   cameraControls?: boolean
   autoRotate?: boolean
+  environmentImage?: string
+  exposure?: string | number
   className?: string
   children?: ReactNode
 }
@@ -50,6 +52,8 @@ const ModelViewerWrapper = forwardRef<HTMLElement, ModelViewerWrapperProps>(
       arScale = "auto",
       cameraControls = false,
       autoRotate = false,
+      environmentImage,
+      exposure = "1",
       className = "",
       children,
     },
@@ -117,7 +121,8 @@ const ModelViewerWrapper = forwardRef<HTMLElement, ModelViewerWrapperProps>(
         camera-controls={cameraControls}
         auto-rotate={autoRotate}
         shadow-intensity="1"
-        exposure="1"
+        exposure={exposure.toString()}
+        environment-image={environmentImage}
         loading="eager"
         xr-environment
         className={className}
