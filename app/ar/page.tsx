@@ -24,6 +24,8 @@ function ARViewerContent() {
   // Debug/Testing HDRI temporal
   const [hdri, setHdri] = useState("/HDRI/Diurno-Hotel.hdr")
   const [exposure, setExposure] = useState<number>(1)
+  const [isMirrorMode, setIsMirrorMode] = useState(false)
+  const originalMaterialsRef = useRef<{name: string, roughness: number, metallic: number}[]>([])
   
   const [modelPath, setModelPath] = useState<string>("")
   const [urlStatus, setUrlStatus] = useState<"fetching" | "success" | "error">("fetching")
@@ -269,6 +271,47 @@ function ARViewerContent() {
     setModelLoaded(true)
   }, [])
 
+  // Efecto para Modo Espejo (Debug)
+  useEffect(() => {
+    if (!modelLoaded || !internalViewerRef.current) return
+
+    // @ts-expect-error accessing model-viewer specific properties
+    const model = internalViewerRef.current.model
+    if (!model || !model.materials) return
+
+    const materials = model.materials
+
+    if (isMirrorMode) {
+      // Guardar originales si la lista está vacía
+      if (originalMaterialsRef.current.length === 0) {
+        materials.forEach((material: any) => {
+          originalMaterialsRef.current.push({
+            name: material.name,
+            roughness: material.pbrMetallicRoughness.roughnessFactor,
+            metallic: material.pbrMetallicRoughness.metallicFactor
+          })
+        })
+      }
+
+      // Aplicar modo espejo (cromo)
+      materials.forEach((material: any) => {
+        material.pbrMetallicRoughness.setRoughnessFactor(0)
+        material.pbrMetallicRoughness.setMetallicFactor(1)
+      })
+    } else {
+      // Restaurar originales
+      if (originalMaterialsRef.current.length > 0) {
+        materials.forEach((material: any, index: number) => {
+          const original = originalMaterialsRef.current[index]
+          if (original) {
+            material.pbrMetallicRoughness.setRoughnessFactor(original.roughness)
+            material.pbrMetallicRoughness.setMetallicFactor(original.metallic)
+          }
+        })
+      }
+    }
+  }, [isMirrorMode, modelLoaded])
+
   // SETUP WebXR Image Tracking (FASE 2)
   const QR_SIZE_IN_METERS = 0.05 // 5cm
   const DISH_OFFSET = { x: 0, y: 0.1, z: -0.2 } // Vector M_Dish respecto al QR
@@ -483,6 +526,17 @@ function ARViewerContent() {
                       className="w-full accent-menu-gold"
                     />
                   </div>
+                  
+                  <button
+                    onClick={() => setIsMirrorMode(!isMirrorMode)}
+                    className={`mt-2 w-full border font-mono text-xs px-4 py-2 transition-all rounded-sm uppercase tracking-widest ${
+                      isMirrorMode 
+                        ? "bg-menu-gold text-menu-bg border-menu-gold" 
+                        : "bg-transparent text-menu-gold/80 border-menu-gold/40 hover:bg-menu-gold/10 hover:text-menu-gold"
+                    }`}
+                  >
+                    {isMirrorMode ? "Modo Espejo (Activo)" : "Activar Modo Espejo"}
+                  </button>
                 </div>
                 {/* FIN SECCIÓN TEMPORAL */}
 
