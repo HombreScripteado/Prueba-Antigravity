@@ -511,6 +511,10 @@ function ARViewerContent() {
                     <option value="/HDRI/Nocturno-Studio.hdr">Nocturno-Studio</option>
                   </select>
 
+                  <p className="font-mono text-[10px] text-menu-cream/70 text-center">
+                    HDRI Activo: {hdri}
+                  </p>
+
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between font-mono text-xs text-menu-cream/80">
                       <span>Exposición</span>
@@ -535,7 +539,7 @@ function ARViewerContent() {
                         : "bg-transparent text-menu-gold/80 border-menu-gold/40 hover:bg-menu-gold/10 hover:text-menu-gold"
                     }`}
                   >
-                    {isMirrorMode ? "Modo Espejo (Activo)" : "Activar Modo Espejo"}
+                    {isMirrorMode ? "Test de Espejo: ACTIVO" : "Activar Test de Espejo"}
                   </button>
                 </div>
                 {/* FIN SECCIÓN TEMPORAL */}
