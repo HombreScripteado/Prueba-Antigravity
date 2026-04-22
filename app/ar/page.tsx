@@ -20,6 +20,12 @@ function ARViewerContent() {
   const menuName = searchParams.get("name") || "Plato"
   const returnTo = searchParams.get("returnTo")
   const [retryCount, setRetryCount] = useState(0)
+
+  // On-Screen Debugger
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
+  const addLog = useCallback((msg: string) => {
+    setDebugLogs(prev => [...prev.slice(-14), `[${new Date().toLocaleTimeString()}] ${msg}`])
+  }, [])
   
   // Debug/Testing HDRI temporal
   const [hdri, setHdri] = useState("/HDRI/Diurno-Hotel.hdr")
@@ -46,6 +52,31 @@ function ARViewerContent() {
       router.push("/")
     }
   }, [router, returnTo])
+
+  // Feature Detection & Validation WebXR
+  useEffect(() => {
+    addLog("Iniciando validación WebXR...")
+    if (typeof navigator !== 'undefined') {
+      if (!navigator.xr) {
+        addLog("🔴 ERROR: navigator.xr no existe.")
+      } else {
+        addLog("✅ navigator.xr detectado.")
+        
+        // Comprobar soporte de sesión inmersiva
+        navigator.xr.isSessionSupported('immersive-ar').then((supported: boolean) => {
+          addLog(`immersive-ar soportado: ${supported}`)
+        }).catch((e: Error) => {
+          addLog(`🔴 Error checkeando immersive-ar: ${e.message}`)
+        })
+        
+        // Advertencia para Image Tracking en Android
+        const isAndroid = /android/i.test(navigator.userAgent)
+        if (isAndroid) {
+          addLog("⚠️ ANDROID: Si falla, verificar chrome://flags -> WebXR Incubations.")
+        }
+      }
+    }
+  }, [addLog])
 
   // Fetch Signed URL from Supabase backend
   useEffect(() => {
@@ -213,6 +244,7 @@ function ARViewerContent() {
 
   const handleARStatus = useCallback((event: CustomEvent) => {
     const status = event.detail.status
+    addLog(`AR Status: ${status}`)
 
     // Clear timeout when AR actually starts
     if (arTimeoutRef.current) {
@@ -235,10 +267,11 @@ function ARViewerContent() {
       setErrorMessage("Hubo un problema al iniciar la cámara. Inténtalo de nuevo.")
       if (id) recordARError(id as string, "Fallo emitido por el evento ar-status (failed).")
     }
-  }, [arState, id])
+  }, [arState, id, addLog])
 
   const handleARError = useCallback((event: CustomEvent) => {
     const error = event.detail
+    addLog(`🔴 AR Error: ${error?.message || "Error desconocido / Catastrófico"}`)
 
     // Clear timeout on error
     if (arTimeoutRef.current) {
@@ -260,7 +293,7 @@ function ARViewerContent() {
       setErrorMessage("Ocurrió un error al cargar la experiencia AR. Por favor, intenta nuevamente.")
       if(id) recordARError(id as string, `Error inesperado devuelto por model-viewer: ${error?.message || "Desconocido"}`)
     }
-  }, [id])
+  }, [id, addLog])
 
   // Handle model load event - completes the simulated progress
   const handleModelLoad = useCallback(() => {
@@ -332,22 +365,30 @@ function ARViewerContent() {
          if (navigator.xr && 'isSessionSupported' in navigator.xr) {
            try {
              // Esto es una configuración conceptual experimental para WebXR Image Tracking
-             // Model-Viewer internamente crea la sesión. Si quisiéramos sobrescribirla, 
-             // deberíamos usar hooks más profundos, pero podemos intentar setear los features requeridos.
              const viewer = node as any
              // Intentamos forzar hit-test e image-tracking
              if (viewer.xrEnvironment) {
-                // Feature estricto no lo podemos inyectar facil pre-sesión en viewer estándar sin parches,
-                // por lo que este componente deja la arquitectura lista para cuando la API esté estable o se use ThreeJS.
+                addLog("Solicitando sesión con trackedImages...")
                 console.log("[AR Marker Tracking] Preparando anclajes:", DISH_OFFSET, QR_SIZE_IN_METERS)
+                
+                let checkCount = 0;
+                const checkTracker = () => {
+                  checkCount++;
+                  if (checkCount % 60 === 0) {
+                    addLog("Buscando marcador... / QR Detectado y trackeando");
+                  }
+                  requestAnimationFrame(checkTracker);
+                };
+                requestAnimationFrame(checkTracker);
              }
-           } catch (e) {
+           } catch (e: any) {
              console.warn("Image tracking config failed, falling back to surface tracking", e)
+             addLog(`🔴 Error config tracking: ${e.message}`)
            }
          }
       })
     }
-  }, [handleARStatus, handleARError, handleModelLoad])
+  }, [handleARStatus, handleARError, handleModelLoad, addLog])
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-menu-bg">
@@ -569,6 +610,15 @@ function ARViewerContent() {
           </div>
         </div>
       )}
+
+      {/* On-Screen Debugger Panel */}
+      <div className="fixed top-0 left-0 w-full h-1/3 bg-black/80 text-green-400 font-mono text-xs p-2 overflow-y-auto z-50 pointer-events-none flex flex-col justify-end">
+        {debugLogs.map((log, i) => (
+          <div key={i} className={`${log.includes("🔴") ? "text-red-500" : log.includes("⚠️") ? "text-yellow-400" : "text-green-400"}`}>
+            {log}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
