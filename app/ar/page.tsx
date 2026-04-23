@@ -53,29 +53,54 @@ function ARViewerContent() {
     }
   }, [router, returnTo])
 
-  // Feature Detection & Validation WebXR
+  // Feature Detection & Validation WebXR (Estricto Image-Tracking)
   useEffect(() => {
-    addLog("Iniciando validación WebXR...")
-    if (typeof navigator !== 'undefined') {
+    let isMounted = true
+    
+    async function checkWebXR() {
+      addLog("Iniciando validación estricta WebXR...")
+      
+      if (typeof navigator === 'undefined') return
+      
       if (!navigator.xr) {
-        addLog("🔴 ERROR: navigator.xr no existe.")
-      } else {
-        addLog("✅ navigator.xr detectado.")
+        addLog("🔴 ERROR CRÍTICO: navigator.xr no existe en este navegador.")
+        addLog("🔴 CAUSA: Navegador no compatible, no es HTTPS, o WebXR bloqueado.")
+        return
+      }
+      
+      addLog("✅ API navigator.xr detectada.")
+      
+      try {
+        // 1. Verificamos soporte básico de AR
+        const basicSupported = await navigator.xr.isSessionSupported('immersive-ar')
+        addLog(`Soporte AR Básico (immersive-ar): ${basicSupported ? "✅ SÍ" : "🔴 NO"}`)
         
-        // Comprobar soporte de sesión inmersiva
-        navigator.xr.isSessionSupported('immersive-ar').then((supported: boolean) => {
-          addLog(`immersive-ar soportado: ${supported}`)
-        }).catch((e: Error) => {
-          addLog(`🔴 Error checkeando immersive-ar: ${e.message}`)
+        if (!basicSupported) {
+          addLog("🔴 ERROR: El dispositivo no soporta AR Básico.")
+          return
+        }
+
+        // 2. Verificamos soporte ESTRICTO de Image Tracking
+        addLog("Evaluando requiredFeatures: ['image-tracking']...")
+        const imageTrackingSupported = await navigator.xr.isSessionSupported('immersive-ar', {
+          requiredFeatures: ['image-tracking']
         })
         
-        // Advertencia para Image Tracking en Android
-        const isAndroid = /android/i.test(navigator.userAgent)
-        if (isAndroid) {
-          addLog("⚠️ ANDROID: Si falla, verificar chrome://flags -> WebXR Incubations.")
+        if (imageTrackingSupported) {
+          addLog("✅ EXITO: Image Tracking Soportado: TRUE")
+        } else {
+          addLog("🔴 ERROR: Image Tracking Soportado: FALSE")
+          addLog("🔴 CAUSA: El navegador bloqueó el rastreo de imágenes o el hardware no lo soporta.")
+          addLog("⚠️ ANDROID: Activar 'WebXR Incubations' en chrome://flags")
         }
+      } catch (error: any) {
+         addLog(`🔴 EXCEPCIÓN en isSessionSupported: ${error.message}`)
+         console.error("WebXR check error:", error)
       }
     }
+    
+    checkWebXR()
+    return () => { isMounted = false }
   }, [addLog])
 
   // Fetch Signed URL from Supabase backend
@@ -346,7 +371,7 @@ function ARViewerContent() {
   }, [isMirrorMode, modelLoaded])
 
   // SETUP WebXR Image Tracking (FASE 2)
-  const QR_SIZE_IN_METERS = 0.05 // 5cm
+  const QR_SIZE_IN_METERS = 0.055 // 5.5cm
   const DISH_OFFSET = { x: 0, y: 0.1, z: -0.2 } // Vector M_Dish respecto al QR
 
   // EL ARREGLO: Callback Ref limpio
@@ -358,28 +383,26 @@ function ARViewerContent() {
       node.addEventListener("load", handleModelLoad as EventListener)
       internalViewerRef.current = node
 
-      // Hook experimental WebXR Image Tracking
-      // Intentamos solicitar features adicionales al XR session si el dispositivo entra en modo 'webxr'
+      // Intento de Hook experimental WebXR Image Tracking
       node.addEventListener('ar-button', async (event: any) => {
+         addLog("AR-BUTTON: Botón de AR presionado.")
+         
          // Verificamos si estamos invocando WebXR nativo
          if (navigator.xr && 'isSessionSupported' in navigator.xr) {
            try {
-             // Esto es una configuración conceptual experimental para WebXR Image Tracking
+             addLog("Buscando inyectar requiredFeatures: ['image-tracking']...")
+             
+             // NOTA DE DIAGNÓSTICO ESTRICTO:
+             // Model-viewer NO EXPONE de forma nativa una API para pasar `trackedImages` 
+             // ni para interceptar su `requestSession` y pasarle `requiredFeatures: ['image-tracking']`.
+             // Internamente, siempre usa ['hit-test'] si ar-modes="webxr" está activo.
+             
              const viewer = node as any
-             // Intentamos forzar hit-test e image-tracking
              if (viewer.xrEnvironment) {
-                addLog("Solicitando sesión con trackedImages...")
-                console.log("[AR Marker Tracking] Preparando anclajes:", DISH_OFFSET, QR_SIZE_IN_METERS)
-                
-                let checkCount = 0;
-                const checkTracker = () => {
-                  checkCount++;
-                  if (checkCount % 60 === 0) {
-                    addLog("Buscando marcador... / QR Detectado y trackeando");
-                  }
-                  requestAnimationFrame(checkTracker);
-                };
-                requestAnimationFrame(checkTracker);
+                console.log("[AR Marker Tracking] Preparando anclajes (Intento):", DISH_OFFSET, QR_SIZE_IN_METERS)
+                // Si el entorno tiene soporte (custom fork de model-viewer), intentamos leer el tracker.
+             } else {
+                addLog("⚠️ ADVERTENCIA: model-viewer está forzando sesión estándar sin marcadores.")
              }
            } catch (e: any) {
              console.warn("Image tracking config failed, falling back to surface tracking", e)
@@ -401,7 +424,10 @@ function ARViewerContent() {
           arTrackingMethod="image"
           arMarker="/codigoQR.jpeg"
           arMarkerWidth="0.055"
-          arPlacement="floor"
+          // Hemos removido arPlacement="floor" explícitamente para intentar PROHIBIR 
+          // el hit-test estándar (colocación en el suelo), 
+          // pero model-viewer estándar ignorará esto y hará fallback a free-roam.
+          arPlacement="none" // Valor custom para probar si evita el hit-test
           arScale="fixed"
           cameraControls={false}
           autoRotate={false}
