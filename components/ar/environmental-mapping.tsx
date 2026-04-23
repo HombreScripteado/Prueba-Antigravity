@@ -48,21 +48,21 @@ export function EnvironmentalMapping() {
         <div className="absolute top-1/2 left-1/2 z-30 animate-phone-flight will-change-transform" style={{ transformStyle: "preserve-3d" }}>
           
           {/* Cono de Luz 3D Elegante */}
-          <div className="absolute top-[41px] left-[25px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px) translateX(-50%)" }}>
-            <svg width="240" height="400" viewBox="0 0 240 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Cono principal con base redondeada */}
-              <path d="M 110 0 L 130 0 L 220 360 C 220 390, 20 390, 20 360 Z" fill="url(#elegant-beam)" />
+          <div className="absolute top-[-1px] left-[-2px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px) translateX(-50%)" }}>
+            <svg width="240" height="150" viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Cono principal con base redondeada plana simulando el piso */}
+              <path d="M 115 0 L 125 0 L 190 130 C 190 150, 50 150, 50 130 Z" fill="url(#elegant-beam)" />
               {/* Resplandor central más intenso */}
-              <path d="M 115 0 L 125 0 L 170 340 C 170 360, 70 360, 70 340 Z" fill="url(#elegant-beam-core)" />
+              <path d="M 118 0 L 122 0 L 150 125 C 150 140, 90 140, 90 125 Z" fill="url(#elegant-beam-core)" />
               <defs>
-                <linearGradient id="elegant-beam" x1="120" y1="0" x2="120" y2="400" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.4" />
-                  <stop offset="60%" stopColor="var(--menu-gold)" stopOpacity="0.1" />
+                <linearGradient id="elegant-beam" x1="120" y1="0" x2="120" y2="150" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.6" />
+                  <stop offset="70%" stopColor="var(--menu-gold)" stopOpacity="0.15" />
                   <stop offset="100%" stopColor="var(--menu-gold)" stopOpacity="0.0" />
                 </linearGradient>
-                <linearGradient id="elegant-beam-core" x1="120" y1="0" x2="120" y2="400" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.6" />
-                  <stop offset="50%" stopColor="var(--menu-gold)" stopOpacity="0.15" />
+                <linearGradient id="elegant-beam-core" x1="120" y1="0" x2="120" y2="150" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.8" />
+                  <stop offset="60%" stopColor="var(--menu-gold)" stopOpacity="0.2" />
                   <stop offset="100%" stopColor="var(--menu-gold)" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
