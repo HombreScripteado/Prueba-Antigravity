@@ -433,6 +433,7 @@ function ARViewerContent() {
               </div>
             )}
             </div>
+          </div>
 
           {/* Promo footer */}
           <div className="absolute bottom-8 left-0 right-0 text-center px-4">
