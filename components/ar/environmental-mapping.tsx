@@ -49,18 +49,18 @@ export function EnvironmentalMapping() {
           
           {/* Cono de Luz 3D Elegante */}
           <div className="absolute top-[-1px] left-[-2px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px) translateX(-50%)" }}>
-            <svg width="240" height="150" viewBox="0 0 240 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Cono principal con base redondeada plana simulando el piso */}
-              <path d="M 115 0 L 125 0 L 190 130 C 190 150, 50 150, 50 130 Z" fill="url(#elegant-beam)" />
+            <svg width="240" height="100" viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Cono principal terminando en el borde del plato */}
+              <path d="M 115 0 L 125 0 L 175 85 C 175 100, 65 100, 65 85 Z" fill="url(#elegant-beam)" />
               {/* Resplandor central más intenso */}
-              <path d="M 118 0 L 122 0 L 150 125 C 150 140, 90 140, 90 125 Z" fill="url(#elegant-beam-core)" />
+              <path d="M 118 0 L 122 0 L 150 85 C 150 95, 90 95, 90 85 Z" fill="url(#elegant-beam-core)" />
               <defs>
-                <linearGradient id="elegant-beam" x1="120" y1="0" x2="120" y2="150" gradientUnits="userSpaceOnUse">
+                <linearGradient id="elegant-beam" x1="120" y1="0" x2="120" y2="100" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.6" />
                   <stop offset="70%" stopColor="var(--menu-gold)" stopOpacity="0.15" />
                   <stop offset="100%" stopColor="var(--menu-gold)" stopOpacity="0.0" />
                 </linearGradient>
-                <linearGradient id="elegant-beam-core" x1="120" y1="0" x2="120" y2="150" gradientUnits="userSpaceOnUse">
+                <linearGradient id="elegant-beam-core" x1="120" y1="0" x2="120" y2="100" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.8" />
                   <stop offset="60%" stopColor="var(--menu-gold)" stopOpacity="0.2" />
                   <stop offset="100%" stopColor="var(--menu-gold)" stopOpacity="0.0" />
@@ -88,7 +88,6 @@ export function EnvironmentalMapping() {
             <rect x="5" y="6" width="36" height="70" rx="4" stroke="var(--menu-gold)" strokeWidth="0.5" fill="#000" />
             
             {/* Módulo de cámara */}
-            <circle cx="23" cy="41" r="12" stroke="var(--menu-gold)" strokeWidth="0.5" strokeDasharray="2 2" fill="none" className="animate-[spin_4s_linear_infinite]" />
             <circle cx="23" cy="41" r="4" fill="var(--menu-cream)" className="animate-pulse" />
           </svg>
         </div>
@@ -111,17 +110,12 @@ export function EnvironmentalMapping() {
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Mantener posición de escaneo enfocando al bowl hasta 55% (mayor duración) */
+          /* Mantener posición de escaneo enfocando al bowl hasta 55% */
           55% { 
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Fin del escaneo: giro en perspectiva (puro rotateY) sin voltereta ni rotateZ */
-          65% { 
-            transform: translate3d(40px, -60px, 250px) rotateX(15deg) rotateY(-45deg) rotateZ(0deg); 
-          }
-          
-          /* Salida por la derecha alejándose suavemente (más rápida) */
+          /* Salida fluida, aplica perspectiva (rotateY) y traslación a la vez */
           90% { opacity: 1; }
           100% { 
             transform: translate3d(180px, -120px, -400px) rotateX(5deg) rotateY(-60deg) rotateZ(0deg); 
