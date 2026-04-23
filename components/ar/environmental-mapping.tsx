@@ -1,23 +1,26 @@
 export function EnvironmentalMapping() {
   return (
-    <div className="relative w-full h-64 flex items-center justify-center overflow-hidden">
-      {/* Retícula de puntos base (superficie de la mesa) */}
-      <div 
-        className="absolute w-72 h-40 opacity-40 origin-center"
-        style={{
-          transform: "rotateX(65deg) rotateZ(-25deg)",
-          backgroundImage: "radial-gradient(var(--menu-gold) 1.5px, transparent 1.5px)",
-          backgroundSize: "20px 20px",
-          top: "50%",
-        }}
-      />
+    <div className="relative w-full h-64 flex items-center justify-center overflow-hidden" style={{ perspective: "800px" }}>
       
-      {/* Contenedor principal de la animación */}
-      <div className="relative w-full h-full max-w-sm flex items-center justify-center">
+      {/* Contenedor 3D */}
+      <div className="relative w-full h-full max-w-sm flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
         
-        {/* El Plato (Ensaladera) - Se materializa */}
-        <div className="absolute z-20 animate-materialize will-change-transform drop-shadow-2xl mt-16">
-          <svg width="80" height="50" viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Retícula de puntos base (superficie de la mesa en el plano Z=0) */}
+        <div 
+          className="absolute w-72 h-40 opacity-40 origin-center"
+          style={{
+            transform: "rotateX(65deg) rotateZ(-25deg)",
+            backgroundImage: "radial-gradient(var(--menu-gold) 1.5px, transparent 1.5px)",
+            backgroundSize: "20px 20px",
+          }}
+        />
+        
+        {/* El Plato (Ensaladera) - En el plano Z=0 sobre la mesa */}
+        <div 
+          className="absolute top-1/2 left-1/2 z-20 animate-materialize-3d will-change-transform drop-shadow-2xl"
+          style={{ transform: "translate(-50%, -50%) translateZ(0px)" }}
+        >
+          <svg width="80" height="50" viewBox="0 0 80 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="overflow-visible">
             {/* Sombras y base luminosa */}
             <ellipse cx="40" cy="45" rx="25" ry="5" fill="var(--menu-gold)" opacity="0.2" className="animate-pulse" />
             
@@ -30,7 +33,7 @@ export function EnvironmentalMapping() {
             <path d="M 25 18 Q 30 10 35 16 T 45 12 T 55 18" stroke="var(--menu-cream)" strokeWidth="1" fill="none" opacity="0.8" />
             <path d="M 28 22 Q 35 15 40 20 T 52 22" stroke="var(--menu-cream)" strokeWidth="0.5" fill="none" opacity="0.6" />
             
-            {/* Rayos láser verticales de materialización (Efecto Sci-Fi) */}
+            {/* Rayos láser verticales de materialización */}
             <g className="animate-laser-lines" stroke="var(--menu-gold)" strokeWidth="1" opacity="0.8">
               <line x1="20" y1="45" x2="20" y2="10" strokeDasharray="5 15" />
               <line x1="30" y1="45" x2="30" y2="5" strokeDasharray="8 20" />
@@ -41,19 +44,19 @@ export function EnvironmentalMapping() {
           </svg>
         </div>
 
-        {/* Smartphone y Cono de Luz */}
-        <div className="absolute z-30 animate-phone-sequence will-change-transform mb-16 ml-12">
-          {/* Cono de Luz (Rayo escáner) */}
-          <div className="absolute top-[40px] left-[15px] origin-top animate-beam-sequence pointer-events-none mix-blend-screen">
-            <svg width="100" height="120" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M 0 0 L -60 120 L 60 120 Z" fill="url(#beam-gradient)" />
-              <defs>
-                <linearGradient id="beam-gradient" x1="0" y1="0" x2="0" y2="120" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="var(--menu-gold)" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-            </svg>
+        {/* Smartphone y Cono de Luz en trayectoria 3D */}
+        <div className="absolute top-1/2 left-1/2 z-30 animate-phone-flight will-change-transform" style={{ transformStyle: "preserve-3d" }}>
+          
+          {/* Cono de Luz 3D */}
+          <div className="absolute top-[41px] left-[25px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px)" }}>
+            <div 
+              className="w-[120px] h-[350px]" 
+              style={{ 
+                transform: "translateX(-50%)", 
+                background: "linear-gradient(to bottom, rgba(197, 160, 89, 0.6) 0%, rgba(197, 160, 89, 0) 100%)",
+                clipPath: "polygon(40% 0, 60% 0, 100% 100%, 0 100%)"
+              }}
+            />
           </div>
 
           {/* Smartphone SVG Isometrico */}
@@ -63,8 +66,7 @@ export function EnvironmentalMapping() {
             viewBox="0 0 50 85" 
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
-            className="drop-shadow-2xl relative z-10"
-            style={{ transform: "rotateZ(15deg) rotateX(20deg) rotateY(-15deg)" }}
+            className="absolute top-[-42px] left-[-25px] drop-shadow-2xl"
           >
             {/* Sombra 3D del borde */}
             <rect x="4" y="4" width="42" height="78" rx="8" fill="var(--menu-gold)" opacity="0.3" />
@@ -75,47 +77,63 @@ export function EnvironmentalMapping() {
             {/* Pantalla */}
             <rect x="5" y="6" width="36" height="70" rx="4" stroke="var(--menu-gold)" strokeWidth="0.5" fill="#000" />
             
-            {/* Módulo de cámara (simulado en la parte trasera pero visible por transparencia o diseño de UI) */}
+            {/* Módulo de cámara */}
             <circle cx="23" cy="41" r="12" stroke="var(--menu-gold)" strokeWidth="0.5" strokeDasharray="2 2" fill="none" className="animate-[spin_4s_linear_infinite]" />
             <circle cx="23" cy="41" r="4" fill="var(--menu-cream)" className="animate-pulse" />
           </svg>
         </div>
+
       </div>
 
       <style jsx>{`
-        /* 
-         Timeline General: 6 segundos infinitos
-         0% - 20%: Teléfono entra y escanea
-         20% - 30%: Teléfono se detiene, enfoca
-         30% - 70%: Plato se materializa
-         70% - 85%: Plato brillando totalmente visible
-         85% - 100%: Fade out y reset
-        */
+        /* Timeline General: 8 segundos infinitos */
 
-        @keyframes phoneSequence {
-          0% { transform: translate(-80px, -20px) rotateY(-30deg) scale(0.9); }
-          20% { transform: translate(0px, 0px) rotateY(0deg) scale(1); }
-          85% { transform: translate(0px, 0px) rotateY(0deg) scale(1); opacity: 1; }
-          95% { transform: translate(40px, -10px) rotateY(20deg) scale(0.9); opacity: 0; }
-          100% { transform: translate(-80px, -20px) rotateY(-30deg) scale(0.9); opacity: 0; }
+        @keyframes phoneFlight {
+          /* Entrada por la izquierda (lejos) */
+          0% { 
+            transform: translate3d(-180px, -120px, -400px) rotateX(10deg) rotateY(45deg) rotateZ(-20deg); 
+            opacity: 0; 
+          }
+          10% { opacity: 1; }
+          
+          /* Acercamiento y llegada al centro para escanear (25%) */
+          25% { 
+            transform: translate3d(-20px, -60px, 300px) rotateX(45deg) rotateY(15deg) rotateZ(-10deg); 
+          }
+          
+          /* Mantener posición de escaneo hasta 40% (15% del ciclo = 1.2s) */
+          40% { 
+            transform: translate3d(-20px, -60px, 300px) rotateX(45deg) rotateY(15deg) rotateZ(-10deg); 
+          }
+          
+          /* Giro dramático hacia atrás (rotateY simétrico) */
+          50% { 
+            transform: translate3d(20px, -60px, 250px) rotateX(20deg) rotateY(-160deg) rotateZ(10deg); 
+          }
+          
+          /* Salida por la derecha alejándose (achicándose por la perspectiva Z) */
+          90% { opacity: 1; }
+          100% { 
+            transform: translate3d(180px, -120px, -400px) rotateX(10deg) rotateY(-225deg) rotateZ(20deg); 
+            opacity: 0; 
+          }
         }
 
-        @keyframes beamSequence {
-          0% { opacity: 0; transform: scaleY(0.5) rotateZ(-20deg); }
-          15% { opacity: 0.2; transform: scaleY(0.8) rotateZ(-10deg); }
-          20% { opacity: 0.8; transform: scaleY(1) rotateZ(0deg); }
-          75% { opacity: 0.8; transform: scaleY(1) rotateZ(0deg); }
-          85% { opacity: 0; transform: scaleY(0.5) rotateZ(10deg); }
-          100% { opacity: 0; }
+        @keyframes beamSequence3D {
+          /* Enciende exactamente cuando el celular se estabiliza */
+          0%, 24% { opacity: 0; }
+          25% { opacity: 1; }
+          40% { opacity: 1; }
+          41%, 100% { opacity: 0; }
         }
 
-        @keyframes materialize {
-          0% { clip-path: inset(100% 0 0 0); opacity: 0; filter: drop-shadow(0 0 0px var(--menu-gold)); }
-          30% { clip-path: inset(100% 0 0 0); opacity: 0.8; }
-          60% { clip-path: inset(0 0 0 0); opacity: 1; filter: drop-shadow(0 0 15px var(--menu-gold)); }
-          80% { clip-path: inset(0 0 0 0); opacity: 1; filter: drop-shadow(0 0 5px var(--menu-gold)); }
-          90% { opacity: 0; }
-          100% { clip-path: inset(100% 0 0 0); opacity: 0; }
+        @keyframes materialize3D {
+          /* Bowl materializa en la ventana de escaneo (25% - 40%) */
+          0%, 24% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.8); filter: drop-shadow(0 0 0px var(--menu-gold)); }
+          27% { opacity: 0.9; transform: translate(-50%, -50%) translateZ(0px) scale(1.05); filter: drop-shadow(0 0 20px var(--menu-gold)); }
+          30% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          38% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          42%, 100% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 0px var(--menu-gold)); }
         }
 
         @keyframes laserLines {
@@ -125,20 +143,20 @@ export function EnvironmentalMapping() {
           100% { stroke-dashoffset: -50; opacity: 0; }
         }
 
-        .animate-phone-sequence {
-          animation: phoneSequence 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        .animate-phone-flight {
+          animation: phoneFlight 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
-        .animate-beam-sequence {
-          animation: beamSequence 6s ease-in-out infinite;
+        .animate-beam-sequence-3d {
+          animation: beamSequence3D 8s ease-in-out infinite;
         }
 
-        .animate-materialize {
-          animation: materialize 6s ease-out infinite;
+        .animate-materialize-3d {
+          animation: materialize3D 8s ease-out infinite;
         }
 
         .animate-laser-lines {
-          animation: laserLines 6s linear infinite;
+          animation: laserLines 4s linear infinite;
         }
       `}</style>
     </div>
