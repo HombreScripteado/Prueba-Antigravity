@@ -348,32 +348,32 @@ function ARViewerContent() {
             </h1>
             <div className="mb-8 h-px w-24 bg-gradient-to-r from-transparent via-menu-gold to-transparent" />
 
-            {/* Loading State: Circular Spinner + Environmental Animation */}
-            {(!modelLoaded || urlStatus === "fetching" || arState === "loading") && urlStatus !== "error" && arState !== "denied" && arState !== "error" && (
-              <div className="flex flex-col items-center justify-center w-full">
-                
-                {/* Nueva Animación de Mapeo Ambiental de Fase 3 */}
-                <div className="mb-6 w-full opacity-80 mix-blend-screen">
-                  <EnvironmentalMapping />
-                </div>
+            {/* Animación de Mapeo Ambiental Permanente */}
+            <div className="mb-6 w-full opacity-80 mix-blend-screen transition-opacity duration-1000">
+              <EnvironmentalMapping />
+            </div>
 
-                <div className="relative mb-6">
-                  {/* Spinner SVG elegante */}
-                  <svg className="w-16 h-16 animate-spin text-menu-gold/20" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1" fill="none" />
-                    <path className="opacity-75 text-menu-gold" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  {/* Progreso en el centro */}
-                  <div className="absolute inset-0 flex items-center justify-center font-mono text-[0.6rem] text-menu-gold">
-                    {urlStatus === "fetching" ? "..." : `${Math.round(modelLoadProgress)}%`}
+            {/* Contenedor relativo para alojar el Spinner y el Botón con transiciones suaves */}
+            <div className="relative w-full flex flex-col items-center justify-center min-h-[120px]">
+              {/* Loading State: Circular Spinner (Fades out when loaded) */}
+              {(!modelLoaded || urlStatus === "fetching" || arState === "loading") && urlStatus !== "error" && arState !== "denied" && arState !== "error" && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center w-full animate-out fade-out duration-1000 fill-mode-forwards" style={{ animationDelay: modelLoaded ? '0ms' : '9999s' }}>
+                  <div className="relative mb-4">
+                    {/* Spinner SVG elegante */}
+                    <svg className="w-16 h-16 animate-spin text-menu-gold/20" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1" fill="none" />
+                      <path className="opacity-75 text-menu-gold" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    {/* Progreso en el centro */}
+                    <div className="absolute inset-0 flex items-center justify-center font-mono text-[0.6rem] text-menu-gold">
+                      {urlStatus === "fetching" ? "..." : `${Math.round(modelLoadProgress)}%`}
+                    </div>
                   </div>
+                  <p className="font-mono text-xs tracking-widest text-menu-cream/60 uppercase">
+                    Preparando Entorno 3D...
+                  </p>
                 </div>
-
-                <p className="font-mono text-xs tracking-widest text-menu-cream/60 uppercase">
-                  Preparando Entorno 3D...
-                </p>
-              </div>
-            )}
+              )}
 
             {/* Error State - Camera Denied */}
             {arState === "denied" && (
@@ -415,25 +415,16 @@ function ARViewerContent() {
 
             {/* Idle/Ready State - MAIN CTA */}
             {arState === "idle" && urlStatus === "success" && modelLoaded && (
-              <div className="flex flex-col items-center justify-center w-full animate-in fade-in zoom-in duration-500">
-                <div className="mb-8 relative">
-                  <div className="absolute inset-0 animate-ping rounded-full bg-menu-gold/20" style={{ animationDuration: "2s" }} />
-                  <div className="relative rounded-full border border-menu-gold/40 p-6 bg-menu-bg">
-                    <svg className="h-12 w-12 text-menu-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                  </div>
-                </div>
-
-
-
+              <div className="absolute inset-0 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-backwards delay-500">
                 <button
                   onClick={handleActivateAR}
-                  className="group relative mb-6 w-full overflow-hidden rounded-sm border border-menu-gold bg-menu-gold px-6 py-5 font-mono text-sm tracking-widest text-menu-bg transition-all hover:bg-menu-gold-light"
+                  className="group relative mb-6 w-full overflow-hidden rounded-sm border border-menu-gold bg-menu-gold px-6 py-5 font-mono text-sm tracking-widest text-menu-bg transition-all hover:bg-menu-gold-light hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(197,160,89,0.3)]"
                 >
                   <span className="relative z-10 flex items-center justify-center gap-3 font-semibold">
                     ABRIR CÁMARA
                   </span>
+                  {/* Destello de luz sobre el botón */}
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
                 </button>
 
                 <p className="max-w-xs font-mono text-xs tracking-wide text-menu-cream/50 leading-relaxed">
@@ -441,7 +432,7 @@ function ARViewerContent() {
                 </p>
               </div>
             )}
-          </div>
+            </div>
 
           {/* Promo footer */}
           <div className="absolute bottom-8 left-0 right-0 text-center px-4">
