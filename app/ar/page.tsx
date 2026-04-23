@@ -343,10 +343,10 @@ function ARViewerContent() {
           {/* Main content */}
           <div className="flex flex-col items-center px-6 text-center w-full max-w-sm">
             {/* Model name */}
-            <h1 className="mb-2 mt-12 font-serif text-3xl font-light tracking-wide text-menu-cream capitalize">
+            <h1 className="mb-2 mt-4 font-serif text-3xl font-light tracking-wide text-menu-cream capitalize">
               {menuName}
             </h1>
-            <div className="mb-8 h-px w-24 bg-gradient-to-r from-transparent via-menu-gold to-transparent" />
+            <div className="mb-12 h-px w-24 bg-gradient-to-r from-transparent via-menu-gold to-transparent" />
 
             {/* Animación de Mapeo Ambiental Permanente */}
             <div className="mb-6 w-full opacity-80 mix-blend-screen transition-opacity duration-1000">

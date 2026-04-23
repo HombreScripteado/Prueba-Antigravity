@@ -3,11 +3,11 @@ export function EnvironmentalMapping() {
     <div className="relative w-full h-64 flex items-center justify-center overflow-hidden" style={{ perspective: "800px" }}>
       
       {/* Contenedor 3D */}
-      <div className="relative w-full h-full max-w-sm flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
+      <div className="relative w-full h-full max-w-sm flex items-center justify-center mt-8" style={{ transformStyle: "preserve-3d" }}>
         
-        {/* Retícula de puntos base (superficie de la mesa en el plano Z=0) */}
+        {/* Retícula de puntos base (superficie de la mesa ampliada en el plano Z=0) */}
         <div 
-          className="absolute w-72 h-40 opacity-40 origin-center"
+          className="absolute w-[400px] h-[300px] opacity-40 origin-center"
           style={{
             transform: "rotateX(65deg) rotateZ(-25deg)",
             backgroundImage: "radial-gradient(var(--menu-gold) 1.5px, transparent 1.5px)",
@@ -101,55 +101,55 @@ export function EnvironmentalMapping() {
         @keyframes phoneFlight {
           /* Entrada por la izquierda (lejos) */
           0% { 
-            transform: translate3d(-180px, -120px, -400px) rotateX(10deg) rotateY(30deg) rotateZ(-15deg); 
+            transform: translate3d(-180px, -120px, -400px) rotateX(10deg) rotateY(30deg) rotateZ(0deg); 
             opacity: 0; 
           }
           10% { opacity: 1; }
           
-          /* Acercamiento y llegada al centro exacto para escanear el bowl (25%) */
-          25% { 
+          /* Acercamiento y llegada al centro exacto para escanear el bowl (20%) */
+          20% { 
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Mantener posición de escaneo enfocando al bowl hasta 40% */
-          40% { 
+          /* Mantener posición de escaneo enfocando al bowl hasta 55% (mayor duración) */
+          55% { 
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Fin del escaneo: se inclina hacia la derecha, rotando sutilmente sobre el objeto sin voltereta */
-          50% { 
-            transform: translate3d(40px, -60px, 250px) rotateX(25deg) rotateY(-20deg) rotateZ(10deg); 
+          /* Fin del escaneo: giro en perspectiva (puro rotateY) sin voltereta ni rotateZ */
+          65% { 
+            transform: translate3d(40px, -60px, 250px) rotateX(15deg) rotateY(-45deg) rotateZ(0deg); 
           }
           
-          /* Salida por la derecha alejándose suavemente */
+          /* Salida por la derecha alejándose suavemente (más rápida) */
           90% { opacity: 1; }
           100% { 
-            transform: translate3d(180px, -120px, -400px) rotateX(10deg) rotateY(-30deg) rotateZ(15deg); 
+            transform: translate3d(180px, -120px, -400px) rotateX(5deg) rotateY(-60deg) rotateZ(0deg); 
             opacity: 0; 
           }
         }
 
         @keyframes beamSequence3D {
           /* Enciende exactamente cuando el celular se estabiliza */
-          0%, 24% { opacity: 0; }
-          25% { opacity: 1; }
-          40% { opacity: 1; }
-          41%, 100% { opacity: 0; }
+          0%, 19% { opacity: 0; }
+          20% { opacity: 1; }
+          55% { opacity: 1; }
+          56%, 100% { opacity: 0; }
         }
 
         @keyframes materialize3D {
-          /* Bowl materializa en la ventana de escaneo (25% - 40%) */
-          0%, 24% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.8); filter: drop-shadow(0 0 0px var(--menu-gold)); }
-          27% { opacity: 0.9; transform: translate(-50%, -50%) translateZ(0px) scale(1.05); filter: drop-shadow(0 0 20px var(--menu-gold)); }
-          30% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
-          38% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
-          42%, 100% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 0px var(--menu-gold)); }
+          /* Bowl materializa en la ventana de escaneo (20% - 55%) */
+          0%, 19% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.8); filter: drop-shadow(0 0 0px var(--menu-gold)); }
+          22% { opacity: 0.9; transform: translate(-50%, -50%) translateZ(0px) scale(1.05); filter: drop-shadow(0 0 20px var(--menu-gold)); }
+          25% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          50% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          57%, 100% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 0px var(--menu-gold)); }
         }
 
         @keyframes laserLines {
           0% { stroke-dashoffset: 50; opacity: 0; }
-          30% { stroke-dashoffset: 50; opacity: 1; }
-          60% { stroke-dashoffset: -50; opacity: 0; }
+          20% { stroke-dashoffset: 50; opacity: 1; }
+          50% { stroke-dashoffset: -50; opacity: 0; }
           100% { stroke-dashoffset: -50; opacity: 0; }
         }
 
