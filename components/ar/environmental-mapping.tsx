@@ -47,16 +47,26 @@ export function EnvironmentalMapping() {
         {/* Smartphone y Cono de Luz en trayectoria 3D */}
         <div className="absolute top-1/2 left-1/2 z-30 animate-phone-flight will-change-transform" style={{ transformStyle: "preserve-3d" }}>
           
-          {/* Cono de Luz 3D */}
-          <div className="absolute top-[41px] left-[25px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px)" }}>
-            <div 
-              className="w-[120px] h-[350px]" 
-              style={{ 
-                transform: "translateX(-50%)", 
-                background: "linear-gradient(to bottom, rgba(197, 160, 89, 0.6) 0%, rgba(197, 160, 89, 0) 100%)",
-                clipPath: "polygon(40% 0, 60% 0, 100% 100%, 0 100%)"
-              }}
-            />
+          {/* Cono de Luz 3D Elegante */}
+          <div className="absolute top-[41px] left-[25px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px) translateX(-50%)" }}>
+            <svg width="240" height="400" viewBox="0 0 240 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Cono principal con base redondeada */}
+              <path d="M 110 0 L 130 0 L 220 360 C 220 390, 20 390, 20 360 Z" fill="url(#elegant-beam)" />
+              {/* Resplandor central más intenso */}
+              <path d="M 115 0 L 125 0 L 170 340 C 170 360, 70 360, 70 340 Z" fill="url(#elegant-beam-core)" />
+              <defs>
+                <linearGradient id="elegant-beam" x1="120" y1="0" x2="120" y2="400" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.4" />
+                  <stop offset="60%" stopColor="var(--menu-gold)" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="var(--menu-gold)" stopOpacity="0.0" />
+                </linearGradient>
+                <linearGradient id="elegant-beam-core" x1="120" y1="0" x2="120" y2="400" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor="var(--menu-gold)" stopOpacity="0.6" />
+                  <stop offset="50%" stopColor="var(--menu-gold)" stopOpacity="0.15" />
+                  <stop offset="100%" stopColor="var(--menu-gold)" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+            </svg>
           </div>
 
           {/* Smartphone SVG Isometrico */}
@@ -91,30 +101,30 @@ export function EnvironmentalMapping() {
         @keyframes phoneFlight {
           /* Entrada por la izquierda (lejos) */
           0% { 
-            transform: translate3d(-180px, -120px, -400px) rotateX(10deg) rotateY(45deg) rotateZ(-20deg); 
+            transform: translate3d(-180px, -120px, -400px) rotateX(10deg) rotateY(30deg) rotateZ(-15deg); 
             opacity: 0; 
           }
           10% { opacity: 1; }
           
-          /* Acercamiento y llegada al centro para escanear (25%) */
+          /* Acercamiento y llegada al centro exacto para escanear el bowl (25%) */
           25% { 
-            transform: translate3d(-20px, -60px, 300px) rotateX(45deg) rotateY(15deg) rotateZ(-10deg); 
+            transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Mantener posición de escaneo hasta 40% (15% del ciclo = 1.2s) */
+          /* Mantener posición de escaneo enfocando al bowl hasta 40% */
           40% { 
-            transform: translate3d(-20px, -60px, 300px) rotateX(45deg) rotateY(15deg) rotateZ(-10deg); 
+            transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Giro dramático hacia atrás (rotateY simétrico) */
+          /* Fin del escaneo: se inclina hacia la derecha, rotando sutilmente sobre el objeto sin voltereta */
           50% { 
-            transform: translate3d(20px, -60px, 250px) rotateX(20deg) rotateY(-160deg) rotateZ(10deg); 
+            transform: translate3d(40px, -60px, 250px) rotateX(25deg) rotateY(-20deg) rotateZ(10deg); 
           }
           
-          /* Salida por la derecha alejándose (achicándose por la perspectiva Z) */
+          /* Salida por la derecha alejándose suavemente */
           90% { opacity: 1; }
           100% { 
-            transform: translate3d(180px, -120px, -400px) rotateX(10deg) rotateY(-225deg) rotateZ(20deg); 
+            transform: translate3d(180px, -120px, -400px) rotateX(10deg) rotateY(-30deg) rotateZ(15deg); 
             opacity: 0; 
           }
         }
