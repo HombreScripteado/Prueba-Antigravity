@@ -14,6 +14,9 @@ declare global {
           "ar-modes"?: string
           "ar-placement"?: string
           "ar-scale"?: string
+          "ar-tracking-method"?: string
+          "ar-marker"?: string
+          "ar-marker-width"?: string
           "camera-controls"?: boolean
           "auto-rotate"?: boolean
           "shadow-intensity"?: string
@@ -35,6 +38,9 @@ interface ModelViewerWrapperProps {
   arModes?: string
   arPlacement?: string
   arScale?: string
+  arTrackingMethod?: string
+  arMarker?: string
+  arMarkerWidth?: string
   cameraControls?: boolean
   autoRotate?: boolean
   environmentImage?: string
@@ -50,6 +56,9 @@ const ModelViewerWrapper = forwardRef<HTMLElement, ModelViewerWrapperProps>(
       arModes = "webxr scene-viewer quick-look",
       arPlacement = "floor",
       arScale = "auto",
+      arTrackingMethod,
+      arMarker,
+      arMarkerWidth,
       cameraControls = false,
       autoRotate = false,
       environmentImage,
@@ -118,6 +127,9 @@ const ModelViewerWrapper = forwardRef<HTMLElement, ModelViewerWrapperProps>(
         ar-modes={arModes}
         ar-placement={arPlacement}
         ar-scale={arScale}
+        ar-tracking-method={arTrackingMethod}
+        ar-marker={arMarker}
+        ar-marker-width={arMarkerWidth}
         camera-controls={cameraControls}
         auto-rotate={autoRotate}
         shadow-intensity="1"

@@ -397,9 +397,12 @@ function ARViewerContent() {
         <ModelViewerWrapper
           ref={modelViewerRef}
           src={modelPath}
-          arModes="webxr scene-viewer quick-look"
+          arModes="webxr"
+          arTrackingMethod="image"
+          arMarker="/codigoQR.jpeg"
+          arMarkerWidth="0.055"
           arPlacement="floor"
-          arScale="auto"
+          arScale="fixed"
           cameraControls={false}
           autoRotate={false}
           environmentImage={hdri}
