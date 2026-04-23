@@ -48,7 +48,7 @@ export function EnvironmentalMapping() {
         <div className="absolute top-1/2 left-1/2 z-30 animate-phone-flight will-change-transform" style={{ transformStyle: "preserve-3d" }}>
           
           {/* Cono de Luz 3D Elegante */}
-          <div className="absolute top-[-1px] left-[-2px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px) translateX(-50%)" }}>
+          <div className="absolute top-[-1px] left-[0px] origin-top animate-beam-sequence-3d pointer-events-none mix-blend-screen" style={{ transformStyle: "preserve-3d", transform: "translateZ(-1px) translateX(-50%)" }}>
             <svg width="240" height="100" viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Cono principal terminando en el borde del plato */}
               <path d="M 115 0 L 125 0 L 175 85 C 175 100, 65 100, 65 85 Z" fill="url(#elegant-beam)" />
@@ -88,7 +88,7 @@ export function EnvironmentalMapping() {
             <rect x="5" y="6" width="36" height="70" rx="4" stroke="var(--menu-gold)" strokeWidth="0.5" fill="#000" />
             
             {/* Módulo de cámara */}
-            <circle cx="23" cy="41" r="4" fill="var(--menu-cream)" className="animate-pulse" />
+            <circle cx="25" cy="41" r="4" fill="var(--menu-cream)" className="animate-pulse" />
           </svg>
         </div>
 
@@ -103,20 +103,24 @@ export function EnvironmentalMapping() {
             transform: translate3d(-180px, -120px, -400px) rotateX(10deg) rotateY(30deg) rotateZ(0deg); 
             opacity: 0; 
           }
-          10% { opacity: 1; }
+          5% { opacity: 1; }
           
           /* Acercamiento y llegada al centro exacto para escanear el bowl (20%) */
           20% { 
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Mantener posición de escaneo enfocando al bowl hasta 55% */
-          55% { 
+          /* Mantener posición de escaneo enfocando al bowl hasta 65% (mayor duración) */
+          65% { 
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
+            opacity: 1;
           }
           
-          /* Salida fluida, aplica perspectiva (rotateY) y traslación a la vez */
-          90% { opacity: 1; }
+          /* Salida rápida (20% del tiempo = 1.6s) */
+          85% { 
+            transform: translate3d(180px, -120px, -400px) rotateX(5deg) rotateY(-60deg) rotateZ(0deg); 
+            opacity: 0; 
+          }
           100% { 
             transform: translate3d(180px, -120px, -400px) rotateX(5deg) rotateY(-60deg) rotateZ(0deg); 
             opacity: 0; 
@@ -124,26 +128,31 @@ export function EnvironmentalMapping() {
         }
 
         @keyframes beamSequence3D {
-          /* Enciende exactamente cuando el celular se estabiliza */
-          0%, 19% { opacity: 0; }
-          20% { opacity: 1; }
-          55% { opacity: 1; }
-          56%, 100% { opacity: 0; }
+          /* Enciende y baja progresivamente (wipe-down) */
+          0%, 19% { opacity: 0; clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
+          20% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
+          25% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+          65% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+          66%, 100% { opacity: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
         }
 
         @keyframes materialize3D {
-          /* Bowl materializa en la ventana de escaneo (20% - 55%) */
-          0%, 19% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.8); filter: drop-shadow(0 0 0px var(--menu-gold)); }
-          22% { opacity: 0.9; transform: translate(-50%, -50%) translateZ(0px) scale(1.05); filter: drop-shadow(0 0 20px var(--menu-gold)); }
-          25% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
-          50% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
-          57%, 100% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 0px var(--menu-gold)); }
+          /* Bowl invisible hasta que el rayo toca el piso (25%) */
+          0%, 26% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.8); filter: drop-shadow(0 0 0px var(--menu-gold)); }
+          
+          /* Materialización lenta y notoria (26% a 35%) */
+          30% { opacity: 0.5; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 20px var(--menu-gold)); }
+          35% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          
+          /* Mantiene visible hasta el fin del escaneo (63%) */
+          63% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          66%, 100% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 0px var(--menu-gold)); }
         }
 
         @keyframes laserLines {
-          0% { stroke-dashoffset: 50; opacity: 0; }
-          20% { stroke-dashoffset: 50; opacity: 1; }
-          50% { stroke-dashoffset: -50; opacity: 0; }
+          0%, 25% { stroke-dashoffset: 50; opacity: 0; }
+          27% { stroke-dashoffset: 25; opacity: 1; }
+          35% { stroke-dashoffset: -50; opacity: 0; }
           100% { stroke-dashoffset: -50; opacity: 0; }
         }
 
@@ -160,7 +169,7 @@ export function EnvironmentalMapping() {
         }
 
         .animate-laser-lines {
-          animation: laserLines 4s linear infinite;
+          animation: laserLines 8s linear infinite;
         }
       `}</style>
     </div>
