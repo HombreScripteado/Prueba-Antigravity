@@ -21,18 +21,7 @@ function ARViewerContent() {
   const returnTo = searchParams.get("returnTo")
   const [retryCount, setRetryCount] = useState(0)
 
-  // On-Screen Debugger
-  const [debugLogs, setDebugLogs] = useState<string[]>([])
-  const addLog = useCallback((msg: string) => {
-    setDebugLogs(prev => [...prev.slice(-14), `[${new Date().toLocaleTimeString()}] ${msg}`])
-  }, [])
-  
-  // Debug/Testing HDRI temporal
-  const [hdri, setHdri] = useState("/HDRI/Diurno-Hotel.hdr")
-  const [exposure, setExposure] = useState<number>(1)
-  const [isMirrorMode, setIsMirrorMode] = useState(false)
-  const originalMaterialsRef = useRef<{name: string, roughness: number, metallic: number}[]>([])
-  
+
   const [modelPath, setModelPath] = useState<string>("")
   const [urlStatus, setUrlStatus] = useState<"fetching" | "success" | "error">("fetching")
 
@@ -53,30 +42,7 @@ function ARViewerContent() {
     }
   }, [router, returnTo])
 
-  // Feature Detection & Validation WebXR
-  useEffect(() => {
-    addLog("Iniciando validación WebXR...")
-    if (typeof navigator !== 'undefined') {
-      if (!navigator.xr) {
-        addLog("🔴 ERROR: navigator.xr no existe.")
-      } else {
-        addLog("✅ navigator.xr detectado.")
-        
-        // Comprobar soporte de sesión inmersiva
-        navigator.xr.isSessionSupported('immersive-ar').then((supported: boolean) => {
-          addLog(`immersive-ar soportado: ${supported}`)
-        }).catch((e: Error) => {
-          addLog(`🔴 Error checkeando immersive-ar: ${e.message}`)
-        })
-        
-        // Advertencia para Image Tracking en Android
-        const isAndroid = /android/i.test(navigator.userAgent)
-        if (isAndroid) {
-          addLog("⚠️ ANDROID: Si falla, verificar chrome://flags -> WebXR Incubations.")
-        }
-      }
-    }
-  }, [addLog])
+
 
   // Fetch Signed URL from Supabase backend
   useEffect(() => {
@@ -244,7 +210,6 @@ function ARViewerContent() {
 
   const handleARStatus = useCallback((event: CustomEvent) => {
     const status = event.detail.status
-    addLog(`AR Status: ${status}`)
 
     // Clear timeout when AR actually starts
     if (arTimeoutRef.current) {
@@ -267,11 +232,10 @@ function ARViewerContent() {
       setErrorMessage("Hubo un problema al iniciar la cámara. Inténtalo de nuevo.")
       if (id) recordARError(id as string, "Fallo emitido por el evento ar-status (failed).")
     }
-  }, [arState, id, addLog])
+  }, [arState, id])
 
   const handleARError = useCallback((event: CustomEvent) => {
     const error = event.detail
-    addLog(`🔴 AR Error: ${error?.message || "Error desconocido / Catastrófico"}`)
 
     // Clear timeout on error
     if (arTimeoutRef.current) {
@@ -293,7 +257,7 @@ function ARViewerContent() {
       setErrorMessage("Ocurrió un error al cargar la experiencia AR. Por favor, intenta nuevamente.")
       if(id) recordARError(id as string, `Error inesperado devuelto por model-viewer: ${error?.message || "Desconocido"}`)
     }
-  }, [id, addLog])
+  }, [id])
 
   // Handle model load event - completes the simulated progress
   const handleModelLoad = useCallback(() => {
@@ -304,52 +268,6 @@ function ARViewerContent() {
     setModelLoaded(true)
   }, [])
 
-  // Efecto para Modo Espejo (Debug)
-  useEffect(() => {
-    if (!modelLoaded || !internalViewerRef.current) return
-
-    // @ts-expect-error accessing model-viewer specific properties
-    const model = internalViewerRef.current.model
-    if (!model || !model.materials) return
-
-    const materials = model.materials
-
-    if (isMirrorMode) {
-      // Guardar originales si la lista está vacía
-      if (originalMaterialsRef.current.length === 0) {
-        materials.forEach((material: any) => {
-          originalMaterialsRef.current.push({
-            name: material.name,
-            roughness: material.pbrMetallicRoughness.roughnessFactor,
-            metallic: material.pbrMetallicRoughness.metallicFactor
-          })
-        })
-      }
-
-      // Aplicar modo espejo (cromo)
-      materials.forEach((material: any) => {
-        material.pbrMetallicRoughness.setRoughnessFactor(0)
-        material.pbrMetallicRoughness.setMetallicFactor(1)
-      })
-    } else {
-      // Restaurar originales
-      if (originalMaterialsRef.current.length > 0) {
-        materials.forEach((material: any, index: number) => {
-          const original = originalMaterialsRef.current[index]
-          if (original) {
-            material.pbrMetallicRoughness.setRoughnessFactor(original.roughness)
-            material.pbrMetallicRoughness.setMetallicFactor(original.metallic)
-          }
-        })
-      }
-    }
-  }, [isMirrorMode, modelLoaded])
-
-  // SETUP WebXR Image Tracking (FASE 2)
-  const QR_SIZE_IN_METERS = 0.05 // 5cm
-  const DISH_OFFSET = { x: 0, y: 0.1, z: -0.2 } // Vector M_Dish respecto al QR
-
-  // EL ARREGLO: Callback Ref limpio
   const modelViewerRef = useCallback((node: HTMLElement | null) => {
     if (node !== null) {
       // Eventos estándar
@@ -357,38 +275,8 @@ function ARViewerContent() {
       node.addEventListener("error", handleARError as EventListener)
       node.addEventListener("load", handleModelLoad as EventListener)
       internalViewerRef.current = node
-
-      // Hook experimental WebXR Image Tracking
-      // Intentamos solicitar features adicionales al XR session si el dispositivo entra en modo 'webxr'
-      node.addEventListener('ar-button', async (event: any) => {
-         // Verificamos si estamos invocando WebXR nativo
-         if (navigator.xr && 'isSessionSupported' in navigator.xr) {
-           try {
-             // Esto es una configuración conceptual experimental para WebXR Image Tracking
-             const viewer = node as any
-             // Intentamos forzar hit-test e image-tracking
-             if (viewer.xrEnvironment) {
-                addLog("Solicitando sesión con trackedImages...")
-                console.log("[AR Marker Tracking] Preparando anclajes:", DISH_OFFSET, QR_SIZE_IN_METERS)
-                
-                let checkCount = 0;
-                const checkTracker = () => {
-                  checkCount++;
-                  if (checkCount % 60 === 0) {
-                    addLog("Buscando marcador... / QR Detectado y trackeando");
-                  }
-                  requestAnimationFrame(checkTracker);
-                };
-                requestAnimationFrame(checkTracker);
-             }
-           } catch (e: any) {
-             console.warn("Image tracking config failed, falling back to surface tracking", e)
-             addLog(`🔴 Error config tracking: ${e.message}`)
-           }
-         }
-      })
     }
-  }, [handleARStatus, handleARError, handleModelLoad, addLog])
+  }, [handleARStatus, handleARError, handleModelLoad])
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-menu-bg">
@@ -399,11 +287,11 @@ function ARViewerContent() {
           src={modelPath}
           arModes="webxr scene-viewer quick-look"
           arPlacement="floor"
-          arScale="auto"
+          arScale="fixed"
           cameraControls={false}
           autoRotate={false}
-          environmentImage={hdri}
-          exposure={exposure}
+          environmentImage="/HDRI/Diurno-Hotel.hdr"
+          exposure={0.8}
           className="h-full w-full absolute inset-0"
         >
           {/* Custom AR UI Overlay */}
@@ -455,37 +343,37 @@ function ARViewerContent() {
           {/* Main content */}
           <div className="flex flex-col items-center px-6 text-center w-full max-w-sm">
             {/* Model name */}
-            <h1 className="mb-2 mt-12 font-serif text-3xl font-light tracking-wide text-menu-cream capitalize">
+            <h1 className="mb-2 mt-4 font-serif text-3xl font-light tracking-wide text-menu-cream capitalize">
               {menuName}
             </h1>
-            <div className="mb-8 h-px w-24 bg-gradient-to-r from-transparent via-menu-gold to-transparent" />
+            <div className="mb-12 h-px w-24 bg-gradient-to-r from-transparent via-menu-gold to-transparent" />
 
-            {/* Loading State: Circular Spinner + Environmental Animation */}
-            {(!modelLoaded || urlStatus === "fetching" || arState === "loading") && urlStatus !== "error" && arState !== "denied" && arState !== "error" && (
-              <div className="flex flex-col items-center justify-center w-full">
-                
-                {/* Nueva Animación de Mapeo Ambiental de Fase 3 */}
-                <div className="mb-6 w-full opacity-80 mix-blend-screen">
-                  <EnvironmentalMapping />
-                </div>
+            {/* Animación de Mapeo Ambiental Permanente */}
+            <div className="mb-6 w-full opacity-80 mix-blend-screen transition-opacity duration-1000">
+              <EnvironmentalMapping />
+            </div>
 
-                <div className="relative mb-6">
-                  {/* Spinner SVG elegante */}
-                  <svg className="w-16 h-16 animate-spin text-menu-gold/20" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1" fill="none" />
-                    <path className="opacity-75 text-menu-gold" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  {/* Progreso en el centro */}
-                  <div className="absolute inset-0 flex items-center justify-center font-mono text-[0.6rem] text-menu-gold">
-                    {urlStatus === "fetching" ? "..." : `${Math.round(modelLoadProgress)}%`}
+            {/* Contenedor relativo para alojar el Spinner y el Botón con transiciones suaves */}
+            <div className="relative w-full flex flex-col items-center justify-center min-h-[120px]">
+              {/* Loading State: Circular Spinner (Fades out when loaded) */}
+              {(!modelLoaded || urlStatus === "fetching" || arState === "loading") && urlStatus !== "error" && arState !== "denied" && arState !== "error" && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center w-full animate-out fade-out duration-1000 fill-mode-forwards" style={{ animationDelay: modelLoaded ? '0ms' : '9999s' }}>
+                  <div className="relative mb-4">
+                    {/* Spinner SVG elegante */}
+                    <svg className="w-16 h-16 animate-spin text-menu-gold/20" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1" fill="none" />
+                      <path className="opacity-75 text-menu-gold" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    {/* Progreso en el centro */}
+                    <div className="absolute inset-0 flex items-center justify-center font-mono text-[0.6rem] text-menu-gold">
+                      {urlStatus === "fetching" ? "..." : `${Math.round(modelLoadProgress)}%`}
+                    </div>
                   </div>
+                  <p className="font-mono text-xs tracking-widest text-menu-cream/60 uppercase">
+                    Preparando Entorno 3D...
+                  </p>
                 </div>
-
-                <p className="font-mono text-xs tracking-widest text-menu-cream/60 uppercase">
-                  Preparando Entorno 3D...
-                </p>
-              </div>
-            )}
+              )}
 
             {/* Error State - Camera Denied */}
             {arState === "denied" && (
@@ -527,78 +415,24 @@ function ARViewerContent() {
 
             {/* Idle/Ready State - MAIN CTA */}
             {arState === "idle" && urlStatus === "success" && modelLoaded && (
-              <div className="flex flex-col items-center justify-center w-full animate-in fade-in zoom-in duration-500">
-                <div className="mb-8 relative">
-                  <div className="absolute inset-0 animate-ping rounded-full bg-menu-gold/20" style={{ animationDuration: "2s" }} />
-                  <div className="relative rounded-full border border-menu-gold/40 p-6 bg-menu-bg">
-                    <svg className="h-12 w-12 text-menu-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                    </svg>
-                  </div>
-                </div>
-
-                {/* SECCIÓN TEMPORAL DEBUG/TESTING HDRI */}
-                <div className="mb-6 w-full flex flex-col gap-3 p-4 border border-menu-gold/40 rounded-sm bg-menu-bg/80 relative z-50 pointer-events-auto">
-                  <p className="font-mono text-[10px] tracking-widest text-menu-gold text-center uppercase">Debug/Testing HDRI</p>
-                  
-                  <select 
-                    value={hdri}
-                    onChange={(e) => setHdri(e.target.value)}
-                    className="w-full bg-menu-bg border border-menu-gold/30 text-menu-cream font-mono text-xs p-2 rounded-sm focus:outline-none focus:border-menu-gold"
-                  >
-                    <option value="/HDRI/Diurno-Hotel.hdr">Diurno-Hotel</option>
-                    <option value="/HDRI/Nocturno-Christmas.hdr">Nocturno-Christmas</option>
-                    <option value="/HDRI/Nocturno-Fireplace.hdr">Nocturno-Fireplace</option>
-                    <option value="/HDRI/Nocturno-Studio.hdr">Nocturno-Studio</option>
-                  </select>
-
-                  <p className="font-mono text-[10px] text-menu-cream/70 text-center">
-                    HDRI Activo: {hdri}
-                  </p>
-
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between font-mono text-xs text-menu-cream/80">
-                      <span>Exposición</span>
-                      <span>{exposure.toFixed(1)}</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="0.5" 
-                      max="2.5" 
-                      step="0.1" 
-                      value={exposure}
-                      onChange={(e) => setExposure(parseFloat(e.target.value))}
-                      className="w-full accent-menu-gold"
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={() => setIsMirrorMode(!isMirrorMode)}
-                    className={`mt-2 w-full border font-mono text-xs px-4 py-2 transition-all rounded-sm uppercase tracking-widest ${
-                      isMirrorMode 
-                        ? "bg-menu-gold text-menu-bg border-menu-gold" 
-                        : "bg-transparent text-menu-gold/80 border-menu-gold/40 hover:bg-menu-gold/10 hover:text-menu-gold"
-                    }`}
-                  >
-                    {isMirrorMode ? "Test de Espejo: ACTIVO" : "Activar Test de Espejo"}
-                  </button>
-                </div>
-                {/* FIN SECCIÓN TEMPORAL */}
-
+              <div className="absolute inset-0 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-backwards delay-500">
                 <button
                   onClick={handleActivateAR}
-                  className="group relative mb-6 w-full overflow-hidden rounded-sm border border-menu-gold bg-menu-gold px-6 py-5 font-mono text-sm tracking-widest text-menu-bg transition-all hover:bg-menu-gold-light"
+                  className="group relative mb-6 w-full overflow-hidden rounded-sm border border-menu-gold bg-menu-gold px-6 py-5 font-mono text-sm tracking-widest text-menu-bg transition-all hover:bg-menu-gold-light hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(197,160,89,0.3)]"
                 >
                   <span className="relative z-10 flex items-center justify-center gap-3 font-semibold">
                     ABRIR CÁMARA
                   </span>
+                  {/* Destello de luz sobre el botón */}
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
                 </button>
 
                 <p className="max-w-xs font-mono text-xs tracking-wide text-menu-cream/50 leading-relaxed">
-                  Apunta la cámara al <span className="text-menu-gold">código QR</span> en la mesa o directamente sobre una superficie plana.
+                  Apunta la cámara al <span className="text-menu-gold">código QR</span> para colocar el plato en tu mesa en tamaño real.
                 </p>
               </div>
             )}
+            </div>
           </div>
 
           {/* Promo footer */}
@@ -611,14 +445,7 @@ function ARViewerContent() {
         </div>
       )}
 
-      {/* On-Screen Debugger Panel */}
-      <div className="fixed top-0 left-0 w-full h-1/3 bg-black/80 text-green-400 font-mono text-xs p-2 overflow-y-auto z-50 pointer-events-none flex flex-col justify-end">
-        {debugLogs.map((log, i) => (
-          <div key={i} className={`${log.includes("🔴") ? "text-red-500" : log.includes("⚠️") ? "text-yellow-400" : "text-green-400"}`}>
-            {log}
-          </div>
-        ))}
-      </div>
+
     </div>
   )
 }

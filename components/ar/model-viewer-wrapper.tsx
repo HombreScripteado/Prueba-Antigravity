@@ -49,7 +49,7 @@ const ModelViewerWrapper = forwardRef<HTMLElement, ModelViewerWrapperProps>(
       src,
       arModes = "webxr scene-viewer quick-look",
       arPlacement = "floor",
-      arScale = "auto",
+      arScale = "fixed",
       cameraControls = false,
       autoRotate = false,
       environmentImage,
