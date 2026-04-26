@@ -22,7 +22,9 @@ export async function GET(
     
     // Extraemos el id del archivo desde los parámetros dinámicos de la ruta
     const { id } = await params;
+    console.log(`[DEBUG - PASO 1] Iniciando proxy para el modelo: ${id}`);
     if (!id) {
+      console.log(`[DEBUG - PASO 1] ID no proporcionado.`);
       return new NextResponse('ID del modelo no proporcionado', { status: 400 });
     }
 
@@ -51,29 +53,32 @@ export async function GET(
     if (!isBypassed) {
       const banKey = `banned_${ip}`;
       const rateLimitKey = `rate_limit_${ip}`;
+      
+      console.log(`[DEBUG - PASO 3] Evaluando Rate Limit para IP: ${ip}`);
 
       // Verificamos si la IP ya tiene una clave de bloqueo temporal
       const isBanned = await kv.get(banKey);
       if (isBanned) {
+        console.log(`[DEBUG - PASO 3] IP BANEADA interceptada: ${ip}`);
         return new NextResponse('Acceso temporalmente suspendido', { status: 429 });
       }
 
       // Incrementamos el contador de peticiones para esta IP
       const count = await kv.incr(rateLimitKey);
+      console.log(`[DEBUG - PASO 3] Petición #${count} de ${MAX_REQUESTS} permitidas para ${ip}.`);
 
       if (count === 1) {
         // Si es la primera petición, configuramos una expiración de 10 minutos (600s)
         await kv.expire(rateLimitKey, RATE_LIMIT_EXPIRATION);
       } else if (count > MAX_REQUESTS) {
-        // Si superó las 20 peticiones, castigamos la IP creando la clave de bloqueo por 1 año
+        // Si superó las peticiones, castigamos la IP creando la clave de bloqueo por 1 año
+        console.log(`[DEBUG - PASO 3] LÍMITE EXCEDIDO. Baneando IP: ${ip}`);
         await kv.set(banKey, 'true', { ex: BAN_EXPIRATION });
-        
-        // Extra: Añadimos la IP a un Set global en KV para poder listar y administrar los baneos fácilmente.
-        // Con esto podrás consultar qué IPs están baneadas desde el dashboard o con: await kv.smembers('banned_ips_list')
         await kv.sadd('banned_ips_list', ip);
-
         return new NextResponse('Límite de peticiones excedido. Acceso temporalmente suspendido', { status: 429 });
       }
+    } else {
+      console.log(`[DEBUG - PASO 2] Bypass activado. Saltando Rate Limit.`);
     }
 
     // ==========================================
@@ -139,7 +144,9 @@ export async function GET(
 
     // 1. Descargamos el binario completo en la memoria del Edge.
     // Esto es crucial para Vercel Cache: EVITA el "Transfer-Encoding: chunked" que arruina el caché.
+    console.log(`[DEBUG - PASO 7] Descargando ArrayBuffer para ${id}...`);
     const arrayBuffer = await sourceResponse.arrayBuffer();
+    console.log(`[DEBUG - PASO 7] ArrayBuffer descargado. Tamaño: ${arrayBuffer.byteLength} bytes.`);
 
     // Preparamos los headers de respuesta
     const responseHeaders: Record<string, string> = {
@@ -148,6 +155,12 @@ export async function GET(
       'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable, no-transform',
       'Access-Control-Allow-Origin': '*',
       'Content-Type': contentType,
+      // Headers de Debug:
+      'X-Debug-Model-Id': id,
+      'X-Debug-Buffer-Size': arrayBuffer.byteLength.toString(),
+      'X-Debug-Origin-Length': contentLength || 'none',
+      'X-Debug-Bypass-Status': isBypassed.toString(),
+      'X-Debug-IP': ip,
     };
 
     // Vercel Edge Cache EXIGE el Content-Length para cachear la respuesta.
@@ -158,6 +171,8 @@ export async function GET(
       // Si el origen no lo tenía, usamos el peso real del buffer en memoria
       responseHeaders['Content-Length'] = arrayBuffer.byteLength.toString();
     }
+
+    console.log(`[DEBUG - PASO 7] Enviando respuesta con Content-Length estático. Headers generados.`);
 
     // Retornamos el buffer estático directo en la respuesta.
     return new NextResponse(arrayBuffer, {
