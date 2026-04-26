@@ -13,7 +13,7 @@ const MAX_REQUESTS = 20;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // ==========================================
@@ -21,7 +21,7 @@ export async function GET(
     // ==========================================
     
     // Extraemos el id del archivo desde los parámetros dinámicos de la ruta
-    const id = params.id;
+    const { id } = await params;
     if (!id) {
       return new NextResponse('ID del modelo no proporcionado', { status: 400 });
     }
