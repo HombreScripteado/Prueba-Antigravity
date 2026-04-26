@@ -137,21 +137,30 @@ export async function GET(
     const contentType = sourceResponse.headers.get('content-type') || 'model/gltf-binary';
     const contentLength = sourceResponse.headers.get('content-length');
 
+    // 1. Descargamos el binario completo en la memoria del Edge.
+    // Esto es crucial para Vercel Cache: EVITA el "Transfer-Encoding: chunked" que arruina el caché.
+    const arrayBuffer = await sourceResponse.arrayBuffer();
+
     // Preparamos los headers de respuesta
     const responseHeaders: Record<string, string> = {
-      'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
+      // 'no-transform' ES OBLIGATORIO: prohíbe a Vercel/Cloudflare aplicarle compresión Brotli (br)
+      // al archivo y alterar nuestro Content-Length.
+      'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable, no-transform',
       'Access-Control-Allow-Origin': '*',
       'Content-Type': contentType,
     };
 
     // Vercel Edge Cache EXIGE el Content-Length para cachear la respuesta.
-    // Si no lo pasamos, Vercel asume "Transfer-Encoding: chunked" y deshabilita el caché.
+    // Aunque Next.js lo autocalcula al pasar un ArrayBuffer, lo forzamos por seguridad.
     if (contentLength) {
       responseHeaders['Content-Length'] = contentLength;
+    } else {
+      // Si el origen no lo tenía, usamos el peso real del buffer en memoria
+      responseHeaders['Content-Length'] = arrayBuffer.byteLength.toString();
     }
 
-    // Retornamos el body (que es un stream) directamente en la respuesta.
-    return new NextResponse(sourceResponse.body, {
+    // Retornamos el buffer estático directo en la respuesta.
+    return new NextResponse(arrayBuffer, {
       status: 200,
       headers: responseHeaders,
     });
