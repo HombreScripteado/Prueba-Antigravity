@@ -133,18 +133,27 @@ export async function GET(
     // PASO 7: Construcción de Respuesta y Caché Infinita
     // ==========================================
     
-    // Recuperamos el tipo de contenido original que devuelve Supabase
+    // Recuperamos headers del origen
     const contentType = sourceResponse.headers.get('content-type') || 'model/gltf-binary';
+    const contentLength = sourceResponse.headers.get('content-length');
+
+    // Preparamos los headers de respuesta
+    const responseHeaders: Record<string, string> = {
+      'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': contentType,
+    };
+
+    // Vercel Edge Cache EXIGE el Content-Length para cachear la respuesta.
+    // Si no lo pasamos, Vercel asume "Transfer-Encoding: chunked" y deshabilita el caché.
+    if (contentLength) {
+      responseHeaders['Content-Length'] = contentLength;
+    }
 
     // Retornamos el body (que es un stream) directamente en la respuesta.
-    // OBLIGATORIO: Edge Caching y headers CORS
     return new NextResponse(sourceResponse.body, {
       status: 200,
-      headers: {
-        'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': contentType,
-      },
+      headers: responseHeaders,
     });
 
   } catch (error) {
