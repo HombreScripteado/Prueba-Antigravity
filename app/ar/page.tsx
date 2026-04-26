@@ -62,7 +62,8 @@ function ARViewerContent() {
         
         if (result.success) {
           // Appending retry cache bust for subsequent fetches
-          setModelPath(result.url + (retryCount > 0 ? `&retry=${retryCount}` : ""))
+          const separator = result.url.includes('?') ? '&' : '?';
+          setModelPath(result.url + (retryCount > 0 ? `${separator}retry=${retryCount}` : ""))
           setUrlStatus("success")
         } else {
           // Error logged to Supabase inside action

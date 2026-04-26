@@ -23,18 +23,11 @@ export async function getARModelSignedUrl(dishId: string): Promise<
 
     const { model_3d_path } = dishData
 
-    // 2. Generate signed URL for 60 seconds (60 secs)
-    const { data: storageData, error: storageError } = await supabase.storage
-      .from("modelos_3d")
-      .createSignedUrl(model_3d_path, 60)
+    // 2. Devolvemos la ruta de nuestra API proxy en Vercel para que Edge lo cachee.
+    // Pasamos el path exacto para que el endpoint de API se encargue de firmar y streamear.
+    const proxyUrl = `/api/models/${encodeURIComponent(model_3d_path)}`
 
-    if (storageError || !storageData?.signedUrl) {
-      const diagnostic = `getARModelSignedUrl: Signed URL generation failed for dish_id ${dishId} and path ${model_3d_path}. Storage Error: ${storageError?.message}`
-      await recordARError(dishId, diagnostic)
-      return { success: false, diagnostic }
-    }
-
-    return { success: true, url: storageData.signedUrl }
+    return { success: true, url: proxyUrl }
   } catch (error: any) {
     const diagnostic = `getARModelSignedUrl: Unexpected runtime error for dish_id ${dishId}. Details: ${error?.message}`
     await recordARError(dishId, diagnostic)
