@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { kv } from '@vercel/kv';
 
-// Especificamos explícitamente el uso de Edge Runtime para baja latencia
-export const runtime = 'edge';
+// Eliminamos explícitamente "export const runtime = 'edge'" para usar el motor Serverless (Node.js) estándar.
+// Esto permite enviar el ArrayBuffer con Content-Length real y evitar el chunked transfer que rompe el caché.
 
 // Constantes de configuración
 const BUCKET_NAME = 'modelos_3d';
 const RATE_LIMIT_EXPIRATION = 600; // 10 minutos en segundos
 const BAN_EXPIRATION = 31536000; // 1 año en segundos
 const MAX_REQUESTS = 20;
+const MAX_VERCEL_PAYLOAD_SIZE = 4718592; // 4.5 MB en bytes
 
 export async function GET(
   request: NextRequest,
@@ -22,71 +23,47 @@ export async function GET(
     
     // Extraemos el id del archivo desde los parámetros dinámicos de la ruta
     const { id } = await params;
-    console.log(`[DEBUG - PASO 1] Iniciando proxy para el modelo: ${id}`);
     if (!id) {
-      console.log(`[DEBUG - PASO 1] ID no proporcionado.`);
       return new NextResponse('ID del modelo no proporcionado', { status: 400 });
     }
 
-    // Extraemos la IP del cliente (priorizamos x-forwarded-for y tomamos la primera si hay múltiples)
+    // Extraemos la IP del cliente
     const forwardedFor = request.headers.get('x-forwarded-for');
     const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
 
-    // Extraemos la URL y sus parámetros de búsqueda para obtener el token bypass
+    // Extraemos el token de bypass
     const { searchParams } = new URL(request.url);
     const bypassToken = searchParams.get('bypass');
-
-    // ==========================================
-    // PASO 2: Lógica de Bypass (Llave Maestra)
-    // ==========================================
-    
     const isDevelopment = process.env.NODE_ENV === 'development';
     const isAdminBypass = bypassToken === process.env.ADMIN_BYPASS_TOKEN;
-    
-    // Evaluamos si debemos saltarnos los controles de seguridad
     const isBypassed = isDevelopment || isAdminBypass;
 
     // ==========================================
-    // PASO 3: Rate Limiting y Ban de 1 año (Vercel KV)
+    // PASO 2: Rate Limiting (Vercel KV)
     // ==========================================
     
     if (!isBypassed) {
       const banKey = `banned_${ip}`;
       const rateLimitKey = `rate_limit_${ip}`;
       
-      console.log(`[DEBUG - PASO 3] Evaluando Rate Limit para IP: ${ip}`);
-
-      // Verificamos si la IP ya tiene una clave de bloqueo temporal
       const isBanned = await kv.get(banKey);
       if (isBanned) {
-        console.log(`[DEBUG - PASO 3] IP BANEADA interceptada: ${ip}`);
         return new NextResponse('Acceso temporalmente suspendido', { status: 429 });
       }
 
-      // Incrementamos el contador de peticiones para esta IP
       const count = await kv.incr(rateLimitKey);
-      console.log(`[DEBUG - PASO 3] Petición #${count} de ${MAX_REQUESTS} permitidas para ${ip}.`);
 
       if (count === 1) {
-        // Si es la primera petición, configuramos una expiración de 10 minutos (600s)
         await kv.expire(rateLimitKey, RATE_LIMIT_EXPIRATION);
       } else if (count > MAX_REQUESTS) {
-        // Si superó las peticiones, castigamos la IP creando la clave de bloqueo por 1 año
-        console.log(`[DEBUG - PASO 3] LÍMITE EXCEDIDO. Baneando IP: ${ip}`);
         await kv.set(banKey, 'true', { ex: BAN_EXPIRATION });
         await kv.sadd('banned_ips_list', ip);
         return new NextResponse('Límite de peticiones excedido. Acceso temporalmente suspendido', { status: 429 });
       }
-    } else {
-      console.log(`[DEBUG - PASO 2] Bypass activado. Saltando Rate Limit.`);
     }
 
     // ==========================================
-    // PASO 4: Omitido
-    // ==========================================
-
-    // ==========================================
-    // PASO 5: Interacción con Supabase (Service Role)
+    // PASO 3: Fetch a Supabase
     // ==========================================
     
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -97,30 +74,21 @@ export async function GET(
       return new NextResponse('Error de configuración del servidor', { status: 500 });
     }
 
-    // Inicializamos el cliente con la clave maestra (Service Role Key) para saltar el RLS
-    // Deshabilitamos las funciones de persistencia de sesión porque es un uso server-side
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      }
+      auth: { persistSession: false, autoRefreshToken: false }
     });
 
-    // Generamos la firma con expiración de 60 segundos para proteger el archivo
-    const { data, error } = await supabase
-      .storage
-      .from(BUCKET_NAME)
-      .createSignedUrl(id, 60);
+    const { data, error } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(id, 60);
 
     if (error || !data?.signedUrl) {
-      console.error(`Error generando URL firmada para ${id}:`, error);
       return new NextResponse('Modelo no encontrado o inaccesible', { status: 404 });
     }
 
-    // ==========================================
-    // PASO 6: Fetch y Proxy Stream
-    // ==========================================
-    
+    // --- LOG DE AUDITORÍA DE EGRESS ---
+    // Este log solo se imprimirá en consola si Vercel NO resolvió la petición desde la CDN (Caché Edge).
+    // Si ves este log, significa que costó transferencia de salida en Supabase.
+    console.log(`[SUPABASE FETCH] Descargando ${id} - Egress consumido`);
+
     let sourceResponse: Response;
     try {
       sourceResponse = await fetch(data.signedUrl);
@@ -130,51 +98,41 @@ export async function GET(
     }
 
     if (!sourceResponse.ok) {
-      console.error(`Error en la respuesta origen de Supabase: ${sourceResponse.status}`);
       return new NextResponse('Error recuperando el modelo desde el origen', { status: 500 });
     }
 
+    // Descargamos a memoria el archivo binario completo
+    const arrayBuffer = await sourceResponse.arrayBuffer();
+
     // ==========================================
-    // PASO 7: Construcción de Respuesta y Caché Infinita
+    // PASO 4: Validación de Límites de Vercel
     // ==========================================
     
-    // Recuperamos headers del origen
-    const contentType = sourceResponse.headers.get('content-type') || 'model/gltf-binary';
-    const contentLength = sourceResponse.headers.get('content-length');
-
-    // 1. Descargamos el binario completo en la memoria del Edge.
-    // Esto es crucial para Vercel Cache: EVITA el "Transfer-Encoding: chunked" que arruina el caché.
-    console.log(`[DEBUG - PASO 7] Descargando ArrayBuffer para ${id}...`);
-    const arrayBuffer = await sourceResponse.arrayBuffer();
-    console.log(`[DEBUG - PASO 7] ArrayBuffer descargado. Tamaño: ${arrayBuffer.byteLength} bytes.`);
-
-    // Preparamos los headers de respuesta
-    const responseHeaders: Record<string, string> = {
-      // 'no-transform' ES OBLIGATORIO: prohíbe a Vercel/Cloudflare aplicarle compresión Brotli (br)
-      // al archivo y alterar nuestro Content-Length.
-      'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable, no-transform',
-      'Access-Control-Allow-Origin': '*',
-      'Content-Type': contentType,
-      // Headers de Debug:
-      'X-Debug-Model-Id': id,
-      'X-Debug-Buffer-Size': arrayBuffer.byteLength.toString(),
-      'X-Debug-Origin-Length': contentLength || 'none',
-      'X-Debug-Bypass-Status': isBypassed.toString(),
-      'X-Debug-IP': ip,
-    };
-
-    // Vercel Edge Cache EXIGE el Content-Length para cachear la respuesta.
-    // Aunque Next.js lo autocalcula al pasar un ArrayBuffer, lo forzamos por seguridad.
-    if (contentLength) {
-      responseHeaders['Content-Length'] = contentLength;
-    } else {
-      // Si el origen no lo tenía, usamos el peso real del buffer en memoria
-      responseHeaders['Content-Length'] = arrayBuffer.byteLength.toString();
+    // Serverless Functions en Vercel tienen un límite duro de 4.5 MB para el body de respuesta.
+    if (arrayBuffer.byteLength > MAX_VERCEL_PAYLOAD_SIZE) {
+      console.error(`[ALERTA LÍMITE VERCEL] Modelo demasiado pesado: ${id} pesa ${arrayBuffer.byteLength} bytes (límite: 4718592). Abortando para evitar crash.`);
+      return new NextResponse(`Error: El modelo ${id} excede el límite de 4.5 MB.`, { status: 500 });
     }
 
-    console.log(`[DEBUG - PASO 7] Enviando respuesta con Content-Length estático. Headers generados.`);
+    // ==========================================
+    // PASO 5: Construcción de Respuesta Caché Pura
+    // ==========================================
+    
+    const responseHeaders = new Headers();
+    responseHeaders.set('Content-Type', 'model/gltf-binary');
+    responseHeaders.set('Access-Control-Allow-Origin', '*');
+    
+    // Caché estricto para Vercel Edge Cache. 
+    // s-maxage le dice a la CDN que lo guarde 1 año.
+    // max-age=0 le dice al navegador del usuario que compruebe con el servidor siempre (o use cache busting).
+    // immutable dice que el archivo no cambiará nunca mientras mantenga su URL (ideal si usas ?v=).
+    responseHeaders.set('Cache-Control', 'public, max-age=0, s-maxage=31536000, immutable');
+    
+    // Custom header de auditoría para verificar en el Network Tab del navegador
+    responseHeaders.set('X-FlavorSync-Origin', 'Supabase');
 
-    // Retornamos el buffer estático directo en la respuesta.
+    // Devolver un Buffer nativo a Next.js (Serverless runtime) 
+    // garantiza que envíe el body sin chunking y habilite a la CDN a interceptarlo.
     return new NextResponse(arrayBuffer, {
       status: 200,
       headers: responseHeaders,
