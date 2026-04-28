@@ -78,24 +78,21 @@ export function EnvironmentalMapping() {
             xmlns="http://www.w3.org/2000/svg"
             className="absolute top-[-42px] left-[-25px] drop-shadow-2xl"
           >
-            {/* Sombra 3D del borde */}
-            <rect x="4" y="4" width="42" height="78" rx="8" fill="var(--menu-gold)" opacity="0.3" />
-            
-            {/* Cuerpo principal */}
-            <rect x="2" y="2" width="42" height="78" rx="8" stroke="var(--menu-cream)" strokeWidth="1.5" fill="#111" />
+            {/* Cuerpo principal (perfectamente centrado) */}
+            <rect x="2" y="2" width="46" height="81" rx="8" stroke="var(--menu-cream)" strokeWidth="1.5" fill="#111" />
             
             {/* Pantalla */}
-            <rect x="5" y="6" width="36" height="70" rx="4" stroke="var(--menu-gold)" strokeWidth="0.5" fill="#000" />
+            <rect x="5" y="6" width="40" height="73" rx="4" stroke="var(--menu-gold)" strokeWidth="0.5" fill="#000" />
             
-            {/* Módulo de cámara */}
-            <circle cx="25" cy="41" r="4" fill="var(--menu-cream)" className="animate-pulse" />
+            {/* Módulo de cámara / Punto de escaneo (perfectamente centrado) */}
+            <circle cx="25" cy="42.5" r="4" fill="var(--menu-cream)" className="animate-pulse" />
           </svg>
         </div>
 
       </div>
 
       <style jsx>{`
-        /* Timeline General: 8 segundos infinitos */
+        /* Timeline General: 6 segundos infinitos */
 
         @keyframes phoneFlight {
           /* Entrada por la izquierda (lejos) */
@@ -105,19 +102,19 @@ export function EnvironmentalMapping() {
           }
           5% { opacity: 1; }
           
-          /* Acercamiento y llegada al centro exacto para escanear el bowl (20%) */
-          20% { 
+          /* Acercamiento rápido y llegada al centro exacto para escanear el bowl (15%) */
+          15% { 
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
           }
           
-          /* Mantener posición de escaneo enfocando al bowl hasta 65% (mayor duración) */
-          65% { 
+          /* Mantener posición de escaneo enfocando al bowl hasta 80% */
+          80% { 
             transform: translate3d(0px, -60px, 250px) rotateX(30deg) rotateY(0deg) rotateZ(0deg); 
             opacity: 1;
           }
           
-          /* Salida rápida (20% del tiempo = 1.6s) */
-          85% { 
+          /* Salida rápida (15% del tiempo = 0.9s) */
+          95% { 
             transform: translate3d(180px, -120px, -400px) rotateX(5deg) rotateY(-60deg) rotateZ(0deg); 
             opacity: 0; 
           }
@@ -128,48 +125,48 @@ export function EnvironmentalMapping() {
         }
 
         @keyframes beamSequence3D {
-          /* Enciende y baja progresivamente (wipe-down) */
-          0%, 19% { opacity: 0; clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
-          20% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
-          25% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-          65% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-          66%, 100% { opacity: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+          /* Enciende y baja progresivamente (wipe-down) cuando el cel se acomoda */
+          0%, 14% { opacity: 0; clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
+          15% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 0, 0 0); }
+          20% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+          80% { opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+          81%, 100% { opacity: 0; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
         }
 
         @keyframes materialize3D {
-          /* Bowl invisible hasta que el rayo toca el piso (25%) */
-          0%, 26% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.8); filter: drop-shadow(0 0 0px var(--menu-gold)); }
+          /* Bowl invisible hasta que el rayo toca el piso */
+          0%, 21% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.8); filter: drop-shadow(0 0 0px var(--menu-gold)); }
           
-          /* Materialización lenta y notoria (26% a 35%) */
-          30% { opacity: 0.5; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 20px var(--menu-gold)); }
-          35% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          /* Materialización rápida y notoria */
+          25% { opacity: 0.5; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 20px var(--menu-gold)); }
+          30% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
           
-          /* Mantiene visible hasta el fin del escaneo (63%) */
-          63% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
-          66%, 100% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 0px var(--menu-gold)); }
+          /* Mantiene visible hasta el fin del escaneo */
+          78% { opacity: 1; transform: translate(-50%, -50%) translateZ(0px) scale(1); filter: drop-shadow(0 0 8px var(--menu-gold)); }
+          81%, 100% { opacity: 0; transform: translate(-50%, -50%) translateZ(0px) scale(0.9); filter: drop-shadow(0 0 0px var(--menu-gold)); }
         }
 
         @keyframes laserLines {
-          0%, 25% { stroke-dashoffset: 50; opacity: 0; }
-          27% { stroke-dashoffset: 25; opacity: 1; }
-          35% { stroke-dashoffset: -50; opacity: 0; }
+          0%, 20% { stroke-dashoffset: 50; opacity: 0; }
+          22% { stroke-dashoffset: 25; opacity: 1; }
+          30% { stroke-dashoffset: -50; opacity: 0; }
           100% { stroke-dashoffset: -50; opacity: 0; }
         }
 
         .animate-phone-flight {
-          animation: phoneFlight 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+          animation: phoneFlight 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         .animate-beam-sequence-3d {
-          animation: beamSequence3D 8s ease-in-out infinite;
+          animation: beamSequence3D 6s ease-in-out infinite;
         }
 
         .animate-materialize-3d {
-          animation: materialize3D 8s ease-out infinite;
+          animation: materialize3D 6s ease-out infinite;
         }
 
         .animate-laser-lines {
-          animation: laserLines 8s linear infinite;
+          animation: laserLines 6s linear infinite;
         }
       `}</style>
     </div>

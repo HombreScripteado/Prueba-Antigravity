@@ -71,7 +71,7 @@ export function MenuItem({
         )}
       </div>
       <span className={`text-lg font-medium text-menu-gold whitespace-nowrap ml-4 max-sm:ml-0 ${hasAR ? 'max-sm:pl-9' : ''} ${chefRecommendation ? 'mt-0' : ''}`}>
-        {currency}{price.toFixed(2)}
+        {currency}{new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)}
       </span>
     </>
   )
