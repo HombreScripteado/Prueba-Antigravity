@@ -5,7 +5,7 @@ import { VegetarianIcon, VeganIcon, GlutenFreeIcon } from "./dietary-icons"
 interface MenuItemProps {
   id: string
   name: string
-  description: string
+  description: string | null
   price: number
   hasAR?: boolean
   chefRecommendation?: boolean
@@ -36,17 +36,17 @@ export function MenuItem({
 
   const innerContent = (
     <>
-      {/* Chef Recommendation Badge - properly positioned inside card */}
+      {/* Chef Recommendation Badge */}
       {chefRecommendation && (
-        <span className="absolute top-0 right-0 bg-amber-500 text-menu-bg font-mono text-[0.55rem] tracking-wider px-2.5 py-1.5 rounded-bl-md shadow-md z-10 uppercase">
-          Chef
+        <span className="absolute top-0 right-0 bg-menu-gold text-menu-bg font-mono text-[0.55rem] tracking-widest px-3 py-1.5 rounded-bl-md shadow-lg z-10 uppercase flex items-center gap-1">
+          <span className="text-[0.7rem] leading-none">★</span> Chef
         </span>
       )}
 
       <div className={`flex-1 ${chefRecommendation ? 'pr-16' : ''}`}>
         <h3 className="text-xl font-normal tracking-wide mb-1 flex items-center gap-3 text-menu-cream">
           {hasAR && (
-            <span className="inline-flex items-center justify-center w-6 h-6 border border-menu-gold rounded flex-shrink-0">
+            <span className="ar-icon-pulse inline-flex items-center justify-center w-6 h-6 border border-menu-gold/70 rounded flex-shrink-0 bg-menu-gold/5">
               <ArIcon className="w-3.5 h-3.5 text-menu-gold" />
             </span>
           )}
@@ -61,22 +61,24 @@ export function MenuItem({
             </span>
           )}
         </h3>
-        <p className={`font-mono text-xs font-light text-menu-cream/60 leading-relaxed ${hasAR ? 'pl-9' : ''}`}>
-          {description}
-        </p>
+        {description && (
+          <p className={`font-mono text-xs font-light text-menu-cream/60 leading-relaxed ${hasAR ? 'pl-9' : ''}`}>
+            {description}
+          </p>
+        )}
         {hasAR && (
-          <span className="ar-hint flex items-center gap-2 mt-2 font-mono text-[0.6rem] tracking-widest text-menu-gold-light pl-9">
-            {"→"} Toca para ver en AR
+          <span className="ar-hint flex items-center gap-1.5 mt-2 font-mono text-[0.6rem] tracking-widest text-menu-gold pl-9">
+            <span aria-hidden="true">◈</span> Ver en Realidad Aumentada
           </span>
         )}
       </div>
-      <span className={`text-lg font-medium text-menu-gold whitespace-nowrap ml-4 max-sm:ml-0 ${hasAR ? 'max-sm:pl-9' : ''} ${chefRecommendation ? 'mt-0' : ''}`}>
+      <span className={`text-lg font-medium text-menu-gold whitespace-nowrap ml-4 max-sm:ml-0 ${hasAR ? 'max-sm:pl-9' : ''}`}>
         {currency}{new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)}
       </span>
     </>
   )
 
-  const className = `menu-item-link relative flex justify-between items-start p-5 bg-menu-dark/50 border border-menu-gold/10 transition-all duration-300 ease-out max-sm:flex-col max-sm:gap-3 overflow-hidden ${hasAR ? 'hover:border-menu-gold/30 hover:bg-menu-dark/80 hover:translate-x-1 cursor-pointer' : ''}`
+  const className = `menu-item-link relative flex justify-between items-start p-5 bg-menu-dark/50 border border-menu-gold/10 transition-all duration-300 ease-out max-sm:flex-col max-sm:gap-3 overflow-hidden ${hasAR ? 'menu-item-ar hover:border-menu-gold/40 hover:bg-menu-dark/80 hover:translate-x-1 cursor-pointer' : ''}`
 
   if (hasAR) {
     return (

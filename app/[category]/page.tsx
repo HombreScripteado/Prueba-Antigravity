@@ -33,7 +33,7 @@ export default async function CategoryPage(props: Props) {
   if (!category) return notFound()
 
   return (
-    <div className="bg-black min-h-screen relative pb-16">
+    <div className="menu-bg-gradient bg-black min-h-screen relative pb-16">
       <CornerDecorations />
       
       {/* Top Header Section */}
