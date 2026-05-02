@@ -178,7 +178,10 @@
   },
   "active": "b1cfd0a603507fb4",
   "lastOpenFiles": [
+    "procedimientos/PROTOCOLO_AGENTES.md",
+    "contexto.md",
     "procedimientos/IMPLEMENTACION_MULTI_CLIENTE.md",
+    "procedimientos/TESTING_MULTI_CLIENTE.md",
     "contexto/TABLA_DISHES_SCHEMA.md",
     "decisiones/AUTENTICACION_Y_CACHE_MULTI_CLIENTE.md",
     "decisiones",
