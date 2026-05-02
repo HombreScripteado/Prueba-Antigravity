@@ -173,3 +173,84 @@ npx @claude-flow/cli@latest doctor --fix
 ```
 
 **Agent tool** handles execution (agents, files, code, git). **MCP tools** handle coordination (swarm, memory, hooks). **CLI** is the same via Bash.
+
+---
+
+# FlavorSync Multi-Client Architecture (2026-05-02)
+
+## Quick Reference
+
+**Status**: ✅ Refactoring Complete  
+**Structure**: Next.js Route Groups  
+**Landing**: `/`  
+**Menus**: `/{cliente}/menu`
+
+## How It Works
+
+Route groups `(landing)` and `(menus)` load different CSS per URL:
+- `/` uses `app/(landing)/landing.css` (--bg, --blue, .aurora)
+- `/comidas-felices/menu` uses `app/(menus)/menus-base.css` (--menu-gold, --menu-bg)
+- **No CSS conflicts** — each section isolated
+
+## Adding a New Client
+
+```bash
+# 1. Get UUID from Supabase dishes table
+SELECT DISTINCT client_id FROM dishes;
+
+# 2-4. Copy template and update UUID
+mkdir -p app/(menus)/[new-client]/menu/
+cp app/(menus)/comidas-felices/menu/page.tsx app/(menus)/[new-client]/menu/page.tsx
+# Then edit: const [CLIENT]_CLIENT_ID = 'your-uuid'
+
+# 5. Ensure dishes table has rows with that client_id
+
+# 6. Deploy
+npm run build && git push
+```
+
+## Files You'll Touch
+
+**To add a client**:
+- `app/(menus)/[cliente]/menu/page.tsx` — Copy, change UUID + metadata
+- Supabase `dishes` table — Add dishes with `client_id`
+
+**Do NOT change without coordination**:
+- `app/(menus)/layout.tsx` — Affects all clients
+- `app/(menus)/menus-base.css` — Affects all clients
+- `app/globals.css` — Keep minimal (no theme variables)
+
+**Safe to customize per client**:
+- Create `app/(menus)/[cliente]/menu/custom.css` — Override `--menu-*` variables
+
+## Testing
+
+```bash
+npm run dev
+# Landing: http://localhost:3000/
+# Menu: http://localhost:3000/comidas-felices/menu
+```
+
+Menu returns 404 if no data for UUID (correct behavior).
+
+## Data
+
+Function `getMenuByClientId(clientId: string)` in `lib/menu.ts` filters by `client_id` column.
+
+Table `dishes` requires:
+- `client_id` UUID (CRITICAL)
+- `name`, `price`, `description`
+- `category_id`, `category_name`
+- `section_title`
+
+## Philosophy
+
+**Flexibility over standardization**: Each client gets 100% design freedom in their own folder. No shared constraints, no style collisions.
+
+## References
+
+Full docs in Obsidian (Ruflo):
+- `DECISION_ARQUITECTURA_ROUTE_GROUPS.md`
+- `PROCEDIMIENTO_NUEVO_CLIENTE.md`
+- `CAMBIOS_TECNICOS_2026-05-02.md`
+- `CONTEXTO_GENERAL.md`
