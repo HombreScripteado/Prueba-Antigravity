@@ -36,6 +36,14 @@ const TEST_CLIENTS = [
     expectedDishes: 4,
     expectedCategories: 2,
     color: 'from-yellow-100 to-red-100'
+  },
+  {
+    name: '😋 Comidas Felices',
+    slug: 'comidas-felices',
+    key: 'clave-secreta-felices-456',
+    expectedDishes: 6,
+    expectedCategories: 2,
+    color: 'from-green-100 to-emerald-100'
   }
 ];
 

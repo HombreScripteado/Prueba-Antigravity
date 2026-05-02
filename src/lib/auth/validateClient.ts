@@ -1,16 +1,11 @@
 /**
  * Validación doble de cliente
- * 1. Verificar que client_slug existe en BD
+ * 1. Verificar que client_slug existe en tabla clients
  * 2. Verificar que client_api_key coincide
  * Ambas validaciones deben pasar
  */
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export interface ValidatedClient {
   clientId: string;
@@ -41,10 +36,10 @@ export async function validateClient(
   }
 
   try {
-    // Validación 2: Verificar que ambas credenciales coinciden en BD
-    const { data, error } = await supabase
-      .from('dishes')
-      .select('client_id, client_slug, client_api_key')
+    // Validación 2: Buscar cliente en tabla clients
+    const { data, error } = await supabaseAdmin
+      .from('clients')
+      .select('id, client_slug, client_api_key')
       .eq('client_slug', clientSlug)
       .eq('client_api_key', apiKey)
       .limit(1)
@@ -59,19 +54,9 @@ export async function validateClient(
       };
     }
 
-    // Validación 3: Verificar que slug en BD coincide con slug en request
-    if (data.client_slug !== clientSlug) {
-      return {
-        clientId: '',
-        clientSlug: '',
-        success: false,
-        error: 'Slug validation failed'
-      };
-    }
-
     // ✅ Ambas validaciones pasaron
     return {
-      clientId: data.client_id,
+      clientId: data.id,
       clientSlug: data.client_slug,
       success: true
     };

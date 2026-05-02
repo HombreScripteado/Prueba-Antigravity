@@ -178,14 +178,16 @@
   },
   "active": "b1cfd0a603507fb4",
   "lastOpenFiles": [
+    "2026-05-01.md",
+    "contexto/CONTEXTO_GENERAL.md",
     "procedimientos/PROTOCOLO_AGENTES.md",
+    "cambios.md",
     "contexto.md",
     "procedimientos/IMPLEMENTACION_MULTI_CLIENTE.md",
     "procedimientos/TESTING_MULTI_CLIENTE.md",
     "contexto/TABLA_DISHES_SCHEMA.md",
     "decisiones/AUTENTICACION_Y_CACHE_MULTI_CLIENTE.md",
     "decisiones",
-    "2026-05-01.md",
     "agentes/AGENTES_DISPONIBLES.md",
     "procedimientos/RESTRICCIONES_MODULARIDAD.md",
     "INDEX.md"

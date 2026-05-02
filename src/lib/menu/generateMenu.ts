@@ -3,13 +3,8 @@
  * Obtiene platos de Supabase, los ordena y retorna estructura formateada
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 import { orderMenuItems, type Dish } from './orderItems';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-);
 
 export interface MenuResponse {
   clientId: string;
@@ -31,11 +26,11 @@ export interface MenuResponse {
 export async function generateMenu(clientId: string): Promise<MenuResponse> {
   try {
     // Obtener platos del cliente (solo activos)
-    const { data: dishes, error } = await supabase
+    const { data: dishes, error } = await supabaseAdmin
       .from('dishes')
       .select('*')
       .eq('client_id', clientId)
-      .eq('isActive', true)
+      .eq('is_active', true)
       .order('created_at', { ascending: true });
 
     if (error) {
