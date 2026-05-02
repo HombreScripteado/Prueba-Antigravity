@@ -1,0 +1,15 @@
+{
+  "basePath": "",
+  "baseUrl": "",
+  "pluginSortOrder": "custom",
+  "communityPluginSortOrder": "download",
+  "alwaysUpdateLinks": true,
+  "showLineNumber": false,
+  "useMarkdownLinks": true,
+  "autoConvertHtmlImport": true,
+  "newLinkFormat": "relative",
+  "newFileLocation": "root",
+  "showUnsupportedFiles": false,
+  "showAttachmentExtensions": true,
+  "attachmentFolderPath": "attachments"
+}

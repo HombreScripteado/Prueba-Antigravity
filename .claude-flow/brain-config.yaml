@@ -1,0 +1,117 @@
+# Brain Configuration - Integración Obsidian + Ruflo
+# Sincroniza el Brain (Obsidian) con la memoria de Ruflo
+
+brain:
+  enabled: true
+
+  # Ubicación del Brain
+  path: ./brain
+  indexPath: ./brain/INDEX.md
+
+  # Sincronización automática
+  sync:
+    enabled: true
+    # Sincronizar cambios de código al Brain
+    onCodeEdit: true
+    # Sincronizar cambios del Brain a memoria de Ruflo
+    onBrainUpdate: true
+    # Intervalo de sincronización (ms)
+    interval: 30000
+    # Script a ejecutar
+    script: ./.claude-flow/sync/sync-to-brain.js
+
+  # Carpetas importantes
+  folders:
+    agentes: ./brain/agentes
+    cambios: ./brain/cambios
+    decisiones: ./brain/decisiones
+    contexto: ./brain/contexto
+    procedimientos: ./brain/procedimientos
+    memoria: ./brain/memoria
+
+  # Tipos de notas
+  noteTypes:
+    cambio:
+      template: ./brain/cambios/TEMPLATE.md
+      icon: 📝
+      autoCreate: true
+    agente:
+      icon: 🤖
+      autoCreate: false
+    decision:
+      icon: ⚖️
+      autoCreate: false
+    contexto:
+      icon: 📋
+      autoCreate: false
+
+  # Integración con agentes
+  agents:
+    # Agentes DEBEN leer el Brain antes de actuar
+    requireBrainCheck: true
+    # Protocolos a seguir
+    protocol: ./brain/procedimientos/PROTOCOLO_AGENTES.md
+    # Matriz de responsabilidades
+    responsibilities: ./brain/agentes/AGENTES_DISPONIBLES.md
+    # Avisar si hay conflictos
+    detectConflicts: true
+
+  # Visualización (Graph View)
+  graph:
+    enabled: true
+    # Profundidad del grafo (niveles de conexiones)
+    depth: 3
+    # Filtrar nodos por tipo
+    filterByType: true
+    # Auto-actualizar grafo
+    autoRefresh: true
+
+  # Memoria vectorial
+  vectorMemory:
+    enabled: true
+    # Embeddings
+    embeddings: true
+    # Dimensionalidad
+    dimensions: 1536
+    # Threshold de relevancia
+    relevanceThreshold: 0.7
+    # Auto-indexar nuevas notas
+    autoIndex: true
+
+  # Hooks de Brain
+  hooks:
+    # Antes de que un agente actúe
+    beforeAgentAction: true
+    # Después de editar código
+    afterCodeEdit: true
+    # Cuando se crea una nueva nota
+    onNoteCreate: true
+    # Cuando se actualiza una nota existente
+    onNoteUpdate: true
+
+  # Logging y auditoría
+  logging:
+    enabled: true
+    logPath: ./.claude-flow/logs/brain-sync.log
+    level: info
+
+# Integración con Obsidian
+obsidian:
+  # ¿Monitorear cambios en Obsidian?
+  monitorChanges: true
+  # Carpeta de Obsidian
+  vaultPath: ./brain
+  # Archivos a ignorar
+  ignore:
+    - .obsidian/**
+    - .DS_Store
+    - Thumbs.db
+
+# Rutas de los archivos clave
+keyFiles:
+  index: ./brain/INDEX.md
+  protocol: ./brain/procedimientos/PROTOCOLO_AGENTES.md
+  agents: ./brain/agentes/AGENTES_DISPONIBLES.md
+  context: ./brain/contexto/CONTEXTO_GENERAL.md
+  changes: ./brain/cambios
+  memory: ./brain/memoria

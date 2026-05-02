@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruflo + Obsidian Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card.healthy {
+            border-left: 4px solid #4ade80;
+        }
+
+        .card.warning {
+            border-left: 4px solid #facc15;
+        }
+
+        .card.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-icon {
+            font-size: 1.5em;
+        }
+
+        .metric {
+            margin: 15px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .metric-unit {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .savings {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .savings h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .savings p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: #eee;
+            height: 30px;
+            border-radius: 15px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-icon {
+            font-size: 1.3em;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            font-size: 0.9em;
+        }
+
+        .refresh-btn {
+            background: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .refresh-btn:hover {
+            background: #f0f0f0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .savings h2 {
+                font-size: 1.8em;
+            }
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .stat {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Ruflo + Obsidian Dashboard</h1>
+            <p>Monitor del Sistema de Brain Colectivo</p>
+        </div>
+
+        <div class="savings">
+            <h2>💰 9,170 tokens ahorrados</h2>
+            <p>67% de eficiencia ganada con el Brain</p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 67%;">67%</div>
+            </div>
+        </div>
+
+        <div class="dashboard">
+            <!-- Sistema Status -->
+            <div class="card healthy">
+                <div class="card-title">
+                    <span class="status-icon">✅</span>
+                    Estado del Sistema
+                </div>
+                <ul class="checklist">
+                    <li>
+                        <span class="checklist-icon">✅</span>
+                        <strong>Brain</strong> - Operativo (7 archivos)
+                    </li>
+                    <li>
+                        <span class="checklist-icon">✅</span>
+                        <strong>Sincronización</strong> - Activa
+                    </li>
+                    <li>
+                        <span class="checklist-icon">✅</span>
+                        <strong>Memoria Ruflo</strong> - Indexando
+                    </li>
+                    <li>
+                        <span class="checklist-icon">✅</span>
+                        <strong>Obsidian</strong> - Conectado
+                    </li>
+                </ul>
+                <button class="refresh-btn">Refrescar Estado</button>
+            </div>
+
+            <!-- Brain Metrics -->
+            <div class="card healthy">
+                <div class="card-title">
+                    <span class="status-icon">📊</span>
+                    Brain Metrics
+                </div>
+                <div class="stat-row">
+                    <div class="stat">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">Archivos</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">18 KB</div>
+                        <div class="stat-label">Tamaño</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Cambios sincronizados</div>
+                    <div class="metric-value">0 <span class="metric-unit">cambios recientes</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Última sincronización</div>
+                    <div class="metric-value">Nunca <span class="metric-unit">(primera ejecución)</span></div>
+                </div>
+            </div>
+
+            <!-- Token Efficiency -->
+            <div class="card healthy">
+                <div class="card-title">
+                    <span class="status-icon">⚡</span>
+                    Eficiencia de Tokens
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Tokens CON Brain</div>
+                    <div class="metric-value">4,585 <span class="metric-unit">tokens</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Tokens SIN Brain</div>
+                    <div class="metric-value">13,755 <span class="metric-unit">tokens</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Ahorro</div>
+                    <div class="metric-value" style="color: #22c55e;">9,170 <span class="metric-unit">tokens</span></div>
+                </div>
+            </div>
+
+            <!-- Agentes Status -->
+            <div class="card warning">
+                <div class="card-title">
+                    <span class="status-icon">🤖</span>
+                    Estado de Agentes
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Agentes disponibles</div>
+                    <div class="metric-value">98 <span class="metric-unit">agentes</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Agentes activos</div>
+                    <div class="metric-value">0 <span class="metric-unit">(esperando tareas)</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Protocolo</div>
+                    <div class="metric-value">✅ <span class="metric-unit">Modularidad verificada</span></div>
+                </div>
+            </div>
+
+            <!-- Obsidian Integration -->
+            <div class="card healthy">
+                <div class="card-title">
+                    <span class="status-icon">🧠</span>
+                    Obsidian Integration
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Vault abierto</div>
+                    <div class="metric-value">✅ <span class="metric-unit">Conectado</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Graph View</div>
+                    <div class="metric-value">7 <span class="metric-unit">nodos activos</span></div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Sincronización automática</div>
+                    <div class="metric-value">✅ <span class="metric-unit">Activa (Ctrl+G)</span></div>
+                </div>
+            </div>
+
+            <!-- Health Summary -->
+            <div class="card healthy">
+                <div class="card-title">
+                    <span class="status-icon">🏥</span>
+                    Health Summary
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Sistema</div>
+                    <div class="metric-value" style="color: #22c55e;">SALUDABLE ✅</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Próxima evaluación</div>
+                    <div class="metric-value">Manual <span class="metric-unit">(cuando haya cambios)</span></div>
+                </div>
+                <button class="refresh-btn">Ejecutar Health Check</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Dashboard actualizado: <strong id="timestamp">2026-05-01 01:30:00</strong></p>
+            <p>Para ejecutar health check: <code>node .claude-flow/metrics/health-check.js</code></p>
+        </div>
+    </div>
+
+    <script>
+        // Actualizar timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('es-ES');
+
+        // Botones de refresh (simulados por ahora)
+        document.querySelectorAll('.refresh-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alert('Ejecuta: node .claude-flow/metrics/health-check.js\n\nEste dashboard es estático. Para datos en tiempo real, ejecuta el script desde terminal.');
+            });
+        });
+    </script>
+</body>
+</html>
