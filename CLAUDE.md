@@ -2,6 +2,11 @@
 
 ## Rules
 
+- **⚠️ CRITICAL: ALWAYS use Ruflo + Obsidian together for ALL tasks** — This is essential for efficient token usage and proper agent coordination. Every session, every project, no exceptions.
+  - Before ANY task: Use `memory_search` to check for related patterns
+  - Route with: `hooks_route` (single agent vs swarm decision)
+  - Multi-file (3+): MUST use `swarm_init` + `agent_spawn` (saves tokens)
+  - After work: Update Obsidian brain/ + use `memory_store` to record learnings
 - Do what has been asked; nothing more, nothing less
 - NEVER create files unless absolutely necessary — prefer editing existing files
 - NEVER create documentation files unless explicitly requested
